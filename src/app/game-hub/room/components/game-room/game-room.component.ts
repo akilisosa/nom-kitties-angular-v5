@@ -188,8 +188,9 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
             // Draw the player
     this.ctx.fillStyle = '#ff0000';
     // this.ctx.fillRect(this.player.x, this.player.y, this.player.size, this.player.size);
-
-    drawKitty(this.ctx, this.player.x, this.player.y, 50, 600, '#040607');
+    // getScaledValue(50, this.size)
+    
+    drawKitty(this.ctx, this.player.x, this.player.y, 50, this.size, '#040607');
 
     // const kittySize = this.getScaledValue(50);
     // const kittyX = this.getScaledValue(50);
