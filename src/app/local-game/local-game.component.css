@@ -1,0 +1,59 @@
+.space-bar {
+    font-size: .75rem; margin:0rem; margin-block-end:.25rem
+}
+
+.game-action{
+    font-size: 1.5rem; margin:.25rem
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+.seethrough {
+  opacity: 0;
+}
+
+.square-container {
+    width: 100%;
+    max-width: 600px; /* Optional: limits maximum size */
+    position: relative;
+    background-color: bisque;
+  }
+  
+
+  .pause-text {
+    background-color: black;
+    
+  }
+  .square-container::before {
+    content: '';
+    display: block;
+    padding-bottom: 100%; /* This creates the 1:1 ratio */
+  }
+  
+  .square-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .players {
+    display:none
+  }
+
+   @media screen and (min-width: 600px) {
+    .players {
+      display:block
+    }
+    
+  }

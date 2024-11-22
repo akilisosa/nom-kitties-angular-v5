@@ -1,1 +1,87 @@
-<p>local-game works!</p>
+  
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #sidenav mode="side" [(opened)]="isSidebarOpen">
+      <mat-nav-list>
+        <a mat-list-item routerLink="/dashboard">Login</a>
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+      <div style="width:100%; display:flex; flex-direction:row; justify-content: space-between; margin: 1rem;">
+        <button mat-button color="primary" routerLink="/dashboard">Login</button>
+        <button mat-button color="accent">
+          <p style="font-size: 1.5rem; margin:0rem"><strong>{{timer}}</strong></p>
+        </button>
+        <button mat-button [ngClass]="{'seethrough': active}" (click)="settingsView = !settingsView" color="warn">
+          <p style="font-size: 1.5rem; margin:0rem"><mat-icon>settings</mat-icon></p>
+        </button>
+      </div>
+  
+      <div style="display:flex; flex-direction: row; justify-content: space-between; margin:1rem">
+        <div style="max-width:25%" class="players">
+          <app-player1 [score]="player1Score" (colorChange)="colorChange($event, 'player1')"></app-player1>
+        </div>
+  
+        <div #lobbyContainer id="lobbyContainer" style="width:100%; height: 80vh;">
+          <div *ngIf="!active && !settingsView" style="width:100%; height: 75vh; background-color: bisque; display: flex; justify-content: center; align-items: center;">
+            <div style="width:100%;"  class="pause-text" *ngIf="player1Score === 0 && player2Score === 0">
+              <p style="text-align: center; font-size: 2rem; margin: 0rem;">Nom Kitties!</p>
+              <p style="text-align: center; font-size: 1rem; margin: .25rem;">A game of strategy and skill.</p>
+              <p style="text-align: center; font-size: 1rem; margin: 0rem;">Collect the most treats to win!</p>
+            </div>
+            <div style="width:100%;"  class="pause-text" *ngIf="(player1Score !== 0 || player2Score !== 0) && timer === 0">
+              <p style="text-align: center; font-size: 1.5rem; margin: 0rem;">Winner!</p>
+              <p *ngIf="player1Score !== player2Score" style="text-align: center; font-size: 1.5rem; margin: 0rem;">{{ player1Score > player2Score ? 'Player1': 'Player2'}}</p>
+              <p *ngIf="player1Score === player2Score" style="text-align: center; font-size: 1.5rem; margin: 0rem;">Everyone!</p>
+            </div>
+          </div>
+          <div *ngIf="active" style="width:100%; display:flex; justify-content: center;">
+            <app-gameboard [size]="size" [ngClass]="{'hide': !active, 'show': active }" [active]="active" (scoreChanges)="scoreChange($event)" [player1Color]="player1Color" [player2Color]="player2Color" [treatsOnFloor]="form.controls.treatsOnFloor.value || 0"></app-gameboard>
+          </div>
+          <div *ngIf="!active && settingsView" style="width:100%; height: 80vh; background-color: bisque; display: flex; justify-content: center; align-items: center;">
+            <div>
+              <form [formGroup]="form">
+                <mat-form-field appearance="fill">
+                  <mat-label>Time Limit</mat-label>
+                  <mat-select formControlName="timeLimit">
+                    <mat-option value="10">10s</mat-option>
+                    <mat-option value="15">15s</mat-option>
+                    <mat-option value="20">20s</mat-option>
+                    <mat-option value="30">30s</mat-option>
+                    <mat-option value="60">1m</mat-option>
+                    <mat-option value="90">1m 30s</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                  <mat-label>Treats on the Floor</mat-label>
+                  <input matInput type="number" formControlName="treatsOnFloor" max="10">
+                </mat-form-field>
+              </form>
+            </div>
+          </div>
+          <div style="width: 100%; padding-inline:1rem; text-align: center;">
+            <button mat-raised-button color="primary" *ngIf="!active && (timer ===30 || timer <1)" (click)="startGame()">
+              <div>
+                <p class="game-action">Start Game</p>
+                <p class="space-bar">(space bar)</p>
+              </div>
+            </button>
+            <button mat-raised-button color="primary" *ngIf="!active && timer <30 && timer > 1" (click)="resumeGame()">
+              <div>
+                <p class="game-action">Resume Game</p>
+                <p class="space-bar">(space bar)</p>
+              </div>
+            </button>
+            <button mat-raised-button color="warn" *ngIf="active" (click)="pauseGame()">
+              <div>
+                <p class="game-action">Pause Game</p>
+                <p class="space-bar">(space bar)</p>
+              </div>
+            </button>
+          </div>
+        </div>
+        <div style="max-width:25%" class="players">
+          <app-player2 [score]="player2Score" (colorChange)="colorChange($event, 'player2')"></app-player2>
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>

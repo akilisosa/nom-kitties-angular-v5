@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 // import { RouterOutlet } from '@angular/router';
 import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
-import {  RouterOutlet } from '@angular/router';
+import {  RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -17,7 +17,7 @@ Amplify.configure(outputs);
     templateUrl: './app.component.html',
     standalone: true,
     styleUrl: './app.component.css',
-    imports: [CommonModule, RouterOutlet, 
+    imports: [CommonModule, RouterOutlet, RouterLink,
       MatToolbarModule, MatSidenavModule, MatButtonModule, MatIconModule, MatListModule]
 })
 export class AppComponent {

@@ -2,7 +2,14 @@
     <button mat-icon-button (click)="toggleSidebar()">
       <mat-icon>menu</mat-icon>
     </button>
-    <span>My App</span>
+    <!-- <span>Nom Kitties</span> -->
+
+    <span>
+      <!-- <div style="display:flex; flex-direction: row; align-items: center;"> -->
+        <img src="assets/icon/favicon.png" style="width: 30px; height: 30px; margin-inline-end: 1rem;">
+        {{title}}
+      <!-- </div> -->
+    </span>
   </mat-toolbar>
   
   <mat-sidenav-container class="sidenav-container">
