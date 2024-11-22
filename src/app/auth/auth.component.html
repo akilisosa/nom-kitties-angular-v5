@@ -1,11 +1,55 @@
-<div style="display:flex; height: 100%; width: 100%; align-items: center; justify-content: center;">
-<amplify-authenticator>
-    <ng-template
-      amplifySlot="authenticated"
-      let-user="user"
-      let-signOut="signOut"
-    >
-      <button (click)="signOut()">Sign Out</button>
-    </ng-template>
-  </amplify-authenticator>
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        {{ authState === 'signIn' ? 'Sign in to your account' : 
+           authState === 'signUp' ? 'Create a new account' : 
+           'Confirm your email' }}
+      </h2>
+    </div>
+    <form *ngIf="authState === 'signIn'" [formGroup]="form" (ngSubmit)="handleSignIn()">
+      <div style="display: flex; flex-direction: column;">
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" required>
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" required>
+      </mat-form-field>
+      <div *ngIf="error" class="text-red-500 text-sm">{{ error }}</div>
+      <button mat-raised-button color="primary" type="submit" class="w-full">Sign In</button>
+      <p class="text-center w-full" style="margin:auto">
+        Don't have an account? 
+        <button mat-button type="button" (click)="switchToSignUp()">Sign Up</button>
+      </p>
+    </div>
+    </form>
+    <form *ngIf="authState === 'signUp'" [formGroup]="form" (ngSubmit)="handleSignUp()">
+      <div style="display: flex; flex-direction: column;">
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" required>
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" required>
+      </mat-form-field>
+      <div *ngIf="error" class="text-red-500 text-sm">{{ error }}</div>
+      <button mat-raised-button color="primary" type="submit" class="w-full">Sign Up</button>
+      <p class="text-center w-full" style="margin:auto">
+        Already have an account? 
+        <button mat-button type="button" (click)="switchToSignIn()">Sign In</button>
+      </p>
+      </div>
+    </form>
+    <form *ngIf="authState === 'confirmSignUp'" [formGroup]="form" (ngSubmit)="handleConfirmSignUp()">
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Confirmation Code</mat-label>
+        <input matInput type="text" formControlName="code" required>
+      </mat-form-field>
+      <div *ngIf="error" class="text-red-500 text-sm">{{ error }}</div>
+      <button mat-raised-button color="primary" type="submit" class="w-full">Confirm Sign Up</button>
+    </form>
+  </div>
 </div>

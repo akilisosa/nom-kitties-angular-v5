@@ -1,1 +1,23 @@
-<p>game-hub works!</p>
+<div class="content">
+    <app-quick-start [showRefresh]="true"></app-quick-start>
+    <div>
+      <mat-toolbar>
+        <div style="display:flex; flex-direction: row; align-items: center;">
+          <img src="assets/icon/favicon.png" style="width: 30px; height: 30px; margin-inline-end: 1rem;">
+          <span>Public Games:</span>
+        </div>
+        <span class="spacer"></span>
+        <button mat-icon-button>
+          <mat-icon>filter_list</mat-icon>
+        </button>
+      </mat-toolbar>
+    </div>
+  
+    <mat-list>
+      <mat-list-item *ngFor="let game of roomList" (click)="joinGame(game)">
+        <div mat-line>{{game.simpleCode}}</div>
+        <div mat-line>{{game.mode}}</div>
+        <mat-icon mat-list-icon>sports_esports</mat-icon>
+      </mat-list-item>
+    </mat-list>
+  </div>
