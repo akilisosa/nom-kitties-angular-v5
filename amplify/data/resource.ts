@@ -12,6 +12,49 @@ const schema = a.schema({
       content: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
+
+    User: a
+    .model({
+      name: a.string().required(),
+      color: a.string().required(),
+      type: a.string(),
+      score: a.integer(),
+      gamesPlayed: a.integer(),
+      wins: a.integer(),
+      losses: a.integer(),
+      owner: a.string().required(),
+    })
+    .secondaryIndexes((index: any) => [
+      index('owner'),
+    ])
+    .authorization((allow: any) => [
+      // Owner can do all operations
+      allow.owner(),
+      // Public can read
+      allow.publicApiKey().to(['read']),
+    ]),
+
+
+      // message 
+  Message: a.
+  model({
+    content: a.string().required(),
+    owner: a.string().required(),
+    roomID: a.string().required(),
+    createdAt: a.datetime().required(),
+    color: a.string().required(),
+    name: a.string().required(),
+  })
+  .secondaryIndexes((index: any) => [
+    index('roomID').sortKeys(['createdAt']),
+  ])
+  .authorization((allow: any) => [
+    // Owner can do all operations
+    allow.owner(),
+    // Public can read
+    allow.publicApiKey() //.to(['create', 'read']),
+  ]),
+
 });
 
 export type Schema = ClientSchema<typeof schema>;
