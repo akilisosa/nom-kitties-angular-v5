@@ -1,0 +1,50 @@
+.content {
+    padding: 16px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .image-wrapper {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .centered-image {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .button-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .full-width {
+    width: 100%;
+    padding: 20px;
+    font-size: 1.1em;
+  }
+  
+  /* Make buttons more prominent */
+  button.mat-raised-button {
+    height: 48px;
+    border-radius: 24px;
+  }
+  
+  /* Add some spacing between icon and text */
+  mat-icon {
+    margin-left: 8px;
+  }
+  
