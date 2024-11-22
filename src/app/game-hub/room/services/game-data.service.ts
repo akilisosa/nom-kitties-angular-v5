@@ -59,8 +59,6 @@ export class GameDataService {
 
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log('Received:', data);
-
       switch (data.type) {
         case 'connection_ack':
           console.log('Connection acknowledged');
@@ -130,7 +128,7 @@ export class GameDataService {
       variables: {
         channelName: channelName,
         type: 'data',
-        event: JSON.stringify(["my event content"])
+        event: JSON.stringify(eventData)
       }
     };
 
@@ -139,18 +137,16 @@ export class GameDataService {
       channel: channelName,
       event: JSON.stringify(eventData)
     }
-
     return fetch(endpoint, {
       "method": "POST",
       "headers": {
-        "content-type": "application/json",
+        "content-type": "channelName/json",
         "x-api-key": this.API_KEY
       },
       "body": JSON.stringify({
-        "channel": "default/messages",
+        "channel": channelName,
         "events": [
-          "{\"event_1\":\"data_1\"}",
-          "{\"event_2\":\"data_2\"}"
+          JSON.stringify(eventData)
         ]
       })})
   }

@@ -93,7 +93,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     // check if player is already in the room
 
     if (this.room.players?.some((player: any) => player === curr.userId)) {
-      console.log('already joined');
       return;
     }
 
@@ -112,11 +111,16 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     let lastSegment = urlSegments[urlSegments.length - 1];
     const curr = await this.authService.getCurrentUser();
     this.room = await this.roomService.getRoomByCode(lastSegment);
+    console.log('room', this.room);
     if (!this.room) {
+
       this.roomDoesntExist();
     }
     else {
-      this.subscription.add(this.roomService.subscribeToRoomByID(this.room.id))
+       this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
+        this.room = { ...room };
+        console.log('room', room);
+      });
 
       // .subscribe((room) => {
       //   this.room = { ...room };
@@ -134,7 +138,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.room = room;
         const curr = await this.authService.getCurrentUser();
         if (this.room.owner !== curr.userId) {
-          console.log('room', room);
           await this.joinGame(this.room.id, curr);
         }
       }

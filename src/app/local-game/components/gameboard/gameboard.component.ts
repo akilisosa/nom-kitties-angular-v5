@@ -220,10 +220,6 @@ export class GameboardComponent implements  OnChanges, AfterViewInit  {
   
   
     gameLoop() {
-  
-      console.log('game loop size', this.size);
-  
-  
       // Calculate potential new positions
       const newP1X = this.player1.x + (this.keys.d ? this.player1.speed : (this.keys.a ? -this.player1.speed : 0));
       const newP1Y = this.player1.y + (this.keys.s ? this.player1.speed : (this.keys.w ? -this.player1.speed : 0));

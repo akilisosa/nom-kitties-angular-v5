@@ -1,0 +1,6 @@
+// {"type":"PLAYER_MOVE",
+// "player":{"x":0,"y":50,"size":38.416666666666664,"speed":5,"color":"red"},
+// "keys":{"w":false,"s":false,"a":false,"d":true,"ArrowUp":false,"ArrowDown":false,"ArrowLeft":false,"ArrowRight":false}}
+
+// {"type":"PLAYER_MOVE","player":{"x":0,"y":50,"size":38.416666666666664,"speed":5,"color":"red"},
+// "keys":{"w":false,"s":false,"a":false,"d":true,"ArrowUp":false,"ArrowDown":false,"ArrowLeft":false,"ArrowRight":false}}

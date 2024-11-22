@@ -5,12 +5,6 @@ export const getScaledValue = (value: number, size: number) => {
       }
 
 export const drawKitty = (ctx: any, x: number, y: number, width: number, size: number, color: string = '#040607') => {
-    // Scale factor to maintain proportions
-
-    width = getScaledValue(width, size);
-    x = getScaledValue(x, size);
-    y = getScaledValue(y, size);
-
 
     const scale = width / 50; // SVG viewBox is 50x50
 
@@ -21,7 +15,7 @@ export const drawKitty = (ctx: any, x: number, y: number, width: number, size: n
     // Main body outline (cls-3)
     ctx.fillStyle = color;
     ctx.strokeStyle = 'black'; // Add stroke color
-    ctx.lineWidth = 0.5; 
+    ctx.lineWidth = 1; 
 
     ctx.beginPath();
     ctx.moveTo(8.6, 1.52);
@@ -41,6 +35,7 @@ export const drawKitty = (ctx: any, x: number, y: number, width: number, size: n
     ctx.bezierCurveTo(2.45, 11.53, 6.53, 1.93, 8.6, 1.52);
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
 
     ctx.restore();
   }

@@ -26,8 +26,14 @@ roomListShared() {
 }
 
 subscribeToRoomByID(id: any) {
-  const client = generateClient({ authMode: 'apiKey' })
-  return // client.
+  const client = generateClient<Schema>({ authMode: 'apiKey' })
+  let res;
+ return client.models.Room.onUpdate({ filter: { id: { eq: id } } })
+ 
+//  .subscribe((room: any) => {
+//   console.log('subscribing to room:', room)
+//   this.room.next(room.data.onUpdateRoom);
+//   });
 }
 
 async getRoomByCode(code: string) {
@@ -45,7 +51,7 @@ async getRoomByCode(code: string) {
     })).data[0];
     this.room.next(res);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
   return res;
 }
@@ -54,12 +60,10 @@ async createNewRoom(room: any) { //} CreateRoomInput) {
   const client: any = generateClient({ authMode: 'userPool' })
   let res;
   try {
-    console.log(room);
     res = (await client.models.Room.create(room)).data;
-    console.log('room created', res);
     this.room.next(res);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 
   return res;
@@ -95,14 +99,14 @@ async getRoomList() {
   const client: any = generateClient({ authMode: 'apiKey' })
   let res;
   try {
-    return (await client.models.Room.list({
+    res =  (await client.models.Room.list({
       filter: {
           status: {
               eq: 'WAITING'
           }
       },
     })).data;
-    console.log('room list', res);
+    this.roomList.next(res);
   }
    catch (error) {
     console.log(error);
@@ -111,25 +115,27 @@ async getRoomList() {
 }
 
 async updateRoomWithPlayer(roomID: string, players: any[]) {
-  const client = generateClient({ authMode: 'userPool' })
+  const client: any = generateClient({ authMode: 'userPool' })
   let res;
-  // try {
-  //   res = await client.graphql({
-  //     query: updateRoom,
-  //     variables: {
-  //       input: {
-  //         id: roomID,
-  //         players,
-  //       }
-  //     }
-  //   })
-  //   console.log('joinroom', res.data.updateRoom);
-  //   this.room.next(res.data.updateRoom
-
-  //   );
-  // } catch (error) {
-  //   console.log(error);
-  // }
+  try {
+    res = (await client.models.Room.update({
+      id: roomID,
+      players
+    })).data;
+    // res = await client.graphql({
+    //   query: updateRoom,
+    //   variables: {
+    //     input: {
+    //       id: roomID,
+    //       players,
+    //     }
+    //   }
+    // })
+    console.log('joinroom', res.data)
+    this.room.next(res.data)
+  } catch (error) {
+    console.error(error);
+  }
 
   return res;
 }

@@ -15,9 +15,9 @@
   
     <mat-list>
       <mat-list-item *ngFor="let game of roomList" (click)="joinGame(game)">
-        <div mat-line>{{game.simpleCode}}</div>
-        <div mat-line>{{game.mode}}</div>
-        <mat-icon mat-list-icon>sports_esports</mat-icon>
+        
+        <span class="flex-row" style="align-items: center; justify-content: space-between;"><span>{{game.simpleCode}} - {{game.mode}} </span>   <span> <mat-icon mat-list-icon>sports_esports</mat-icon></span></span>
+  
       </mat-list-item>
     </mat-list>
   </div>

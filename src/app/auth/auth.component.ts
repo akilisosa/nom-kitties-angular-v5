@@ -28,6 +28,7 @@ export class AuthComponent implements OnInit{
 
   authState: 'signIn' | 'signUp' | 'confirmSignUp' = 'signIn';
   error: string = '';
+  showEmailInput = false;
 
 
   form = this.fb.group({
@@ -39,7 +40,6 @@ export class AuthComponent implements OnInit{
   constructor(private router: Router, private fb: FormBuilder) {}
 
   async handleSignIn() {
-    console.log('doing this')
     const { email, password } = this.form.value;
     try {
       if(!email || !password) {
@@ -47,10 +47,9 @@ export class AuthComponent implements OnInit{
         return;
       }
       const a = await signIn({ username: email, password });
-      console.log('a is', a)
       this.router.navigate(['/dashboard']);
     } catch (error) {
-      console.log('error is', error)
+      console.error('error is', error)
       this.error = 'Failed to sign in. Please check your credentials.';
     }
   }
@@ -89,10 +88,18 @@ export class AuthComponent implements OnInit{
         confirmationCode: code
       });
       this.authState = 'signIn';
+      this.error = '';
     } catch (error) {
       this.error = 'Failed to confirm sign up. Please try again.';
     }
   }
+
+  switchToConfirmationCode() {
+    this.authState = 'confirmSignUp';
+    this.error = '';
+    this.showEmailInput = true;
+  }
+  
 
   switchToSignUp() {
     this.authState = 'signUp';

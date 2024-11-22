@@ -41,15 +41,25 @@
         Already have an account? 
         <button mat-button type="button" (click)="switchToSignIn()">Sign In</button>
       </p>
+      <p class="text-center w-full" style="margin:auto">
+        Need to verify your account? 
+        <button mat-button type="button" (click)="switchToConfirmationCode()">Confirmation Code</button>
+      </p>
       </div>
     </form>
     <form *ngIf="authState === 'confirmSignUp'" [formGroup]="form" (ngSubmit)="handleConfirmSignUp()">
+      <div class="flex-column">
+        <mat-form-field *ngIf="showEmailInput" appearance="fill" class="w-full">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" required>
+        </mat-form-field>
       <mat-form-field appearance="fill" class="w-full">
         <mat-label>Confirmation Code</mat-label>
         <input matInput type="text" formControlName="code" required>
       </mat-form-field>
       <div *ngIf="error" class="text-red-500 text-sm">{{ error }}</div>
       <button mat-raised-button color="primary" type="submit" class="w-full">Confirm Sign Up</button>
+    </div>
     </form>
   </div>
 </div>

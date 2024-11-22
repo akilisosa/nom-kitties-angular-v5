@@ -27,7 +27,7 @@ export class UserService {
       // res = await client.models.User.getByOwner({ owner });
 
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
     // this.user.next(res?.data.usersByOwner.items[0]);
     // return res?.data.usersByOwner.items[0];
