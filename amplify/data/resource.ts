@@ -55,6 +55,51 @@ const schema = a.schema({
     allow.publicApiKey() //.to(['create', 'read']),
   ]),
 
+   // ROOM
+   Room: a
+   .model({
+     name: a.string().required(),
+     status: a.enum(['WAITING', 'PLAYING', 'FINISHED', 'CANCELLED']),
+     simpleCode: a.string().required(),
+     public: a.string().required(),
+
+     mode: a.string().required(),
+     timeLimit: a.integer(),
+     roomLimit: a.integer(),
+     totalRounds: a.integer(),
+     full: a.boolean(),
+     players: a.string().array()
+       .authorization(
+         (allow: any) => [allow.owner(),
+         allow.authenticated().to(['read', 'update']),
+         allow.publicApiKey().to(['read', 'update'])],
+       ),
+
+
+     spectators: a.string().array(),
+     currentRound: a.integer(),
+     winner: a.string(),
+
+     // standard
+     owner: a.string().required(),
+     createdAt: a.datetime(),
+   })
+   .secondaryIndexes((index: any) => [
+     index('public').sortKeys(['createdAt']),
+     index('mode').sortKeys(['createdAt']),
+     index('simpleCode'),
+   ])
+   .authorization((allow: any) => [
+     // Owner can do all operations
+     allow.owner(),
+     allow.authenticated().to(['read']),
+     // Public can read
+     allow.publicApiKey().to(['read']),
+   ]),
+
+
+
+
 });
 
 export type Schema = ClientSchema<typeof schema>;
