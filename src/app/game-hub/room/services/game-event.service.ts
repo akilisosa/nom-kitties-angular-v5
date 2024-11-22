@@ -1,13 +1,13 @@
-(window as any).global = window;
-(window as any).process = {
-  env: { DEBUG: undefined }
-};
+// (window as any).global = window;
+// (window as any).process = {
+//   env: { DEBUG: undefined }
+// };
 
 
 import { Injectable } from '@angular/core';
 import { client } from './apollo-config';
 import { gql } from 'apollo-angular';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http'
 
 
 @Injectable({

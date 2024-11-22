@@ -22,7 +22,7 @@ export class GameDataService {
   private messageSubject = new Subject<any>();
   private readonly REALTIME_DOMAIN = 'hjzp2ynwl5ehvjn4lihvnesplm.appsync-realtime-api.us-east-1.amazonaws.com';
   private readonly HTTP_DOMAIN = 'hjzp2ynwl5ehvjn4lihvnesplm.appsync-api.us-east-1.amazonaws.com';
-  private readonly API_KEY = 'da2-bmfwwzhplnb4bg3vdkik62u3ba';
+  private readonly API_KEY = 'da2-kjhwxlzu25d2fgtu5tx54wggem';
 
 
   constructor() { }

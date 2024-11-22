@@ -18,7 +18,7 @@ import { LobbyComponent } from './components/lobby/lobby.component';
     MatButtonModule,
     MatDialogModule,
     ChatRoomComponent,
-    LobbyComponent
+    LobbyComponent,
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'

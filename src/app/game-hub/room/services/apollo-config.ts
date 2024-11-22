@@ -10,7 +10,7 @@ const config = {
   region: 'us-east-1',
   auth: {
     type: "API_KEY" as "API_KEY",
-    apiKey: 'da2-bmfwwzhplnb4bg3vdkik62u3ba'
+    apiKey: 'da2-kjhwxlzu25d2fgtu5tx54wggem'
   }
 };
 
