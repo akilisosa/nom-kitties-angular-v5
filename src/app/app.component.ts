@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-// import { RouterOutlet } from '@angular/router';
 import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
 import {  ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';

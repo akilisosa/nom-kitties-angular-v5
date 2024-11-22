@@ -1,1 +1,11 @@
-<p>auth works!</p>
+<div style="display:flex; height: 100%; width: 100%; align-items: center; justify-content: center;">
+<amplify-authenticator>
+    <ng-template
+      amplifySlot="authenticated"
+      let-user="user"
+      let-signOut="signOut"
+    >
+      <button (click)="signOut()">Sign Out</button>
+    </ng-template>
+  </amplify-authenticator>
+</div>

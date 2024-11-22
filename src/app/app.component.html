@@ -15,18 +15,19 @@
   <mat-sidenav-container class="sidenav-container">
     <mat-sidenav #sidenav mode="side" [(opened)]="isSidebarOpen">
       <mat-nav-list>
-        <a mat-list-item routerLink="/home">
-          <mat-icon>home</mat-icon>
+        <a mat-list-item routerLink="/home" (click)="isSidebarOpen = false">
+          <mat-icon>home</mat-icon>&nbsp;
           <span style="margin-left: 8px;">Home</span>
         </a>
-        <a mat-list-item routerLink="/about">
-          <mat-icon>info</mat-icon>
-          <span style="margin-left: 8px;">About</span>
+        <a mat-list-item routerLink="/local-game" (click)="isSidebarOpen = false">
+          <mat-icon>sports_esports</mat-icon>&nbsp;
+          <span style="margin-left: 8px;">Local Game</span>
         </a>
-        <a mat-list-item routerLink="/contact">
-          <mat-icon>contact_mail</mat-icon>
-          <span style="margin-left: 8px;">Contact</span>
+        <a mat-list-item routerLink="/learn-more" (click)="isSidebarOpen = false">
+          <mat-icon>help_outline</mat-icon>&nbsp;
+          <span style="margin-left: 8px;">Learn More</span>
         </a>
+ 
       </mat-nav-list>
     </mat-sidenav>
     <mat-sidenav-content>
