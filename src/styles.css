@@ -9,6 +9,16 @@ html, body {
   overflow-x: hidden;
 }
 
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
 /* If you still see margins, you can be more aggressive with: */
 /* * {
   margin: 0;

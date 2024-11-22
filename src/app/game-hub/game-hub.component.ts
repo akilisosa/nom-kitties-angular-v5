@@ -41,7 +41,7 @@ export class GameHubComponent implements OnInit {
 
  async joinGame(game: any) {
   // const success =  await this.roomService.joinRoom(game.id);
-  await this.router.navigate(['online-game', 'room', game.simpleCode]);
+  await this.router.navigate(['game-hub', 'room', game.simpleCode]);
   }
   
 }

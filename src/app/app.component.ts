@@ -51,8 +51,8 @@ export class AppComponent {
   private updateTitle(segment: string) {
     if(segment === 'local-game') {
       this.title = 'Local Game'
-    } else if(segment === 'online-game') {
-      this.title = 'Online Game'
+    } else if(segment === 'game-hub') {
+      this.title = 'Online Hub'
     } else if(segment === 'learn-more') {
       this.title = 'Learn More'
     } else if(segment === 'room') {

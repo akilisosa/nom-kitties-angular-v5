@@ -58,15 +58,18 @@ const schema = a.schema({
    // ROOM
    Room: a
    .model({
+     public: a.string().required(),
+     mode: a.string().required(),
+     totalRounds: a.integer(),
+     timeLimit: a.integer(),
+     playersPerRound: a.integer(),
+
+     roomLimit: a.integer(),
+     simpleCode: a.string().required(),
+    
      name: a.string().required(),
      status: a.enum(['WAITING', 'PLAYING', 'FINISHED', 'CANCELLED']),
-     simpleCode: a.string().required(),
-     public: a.string().required(),
 
-     mode: a.string().required(),
-     timeLimit: a.integer(),
-     roomLimit: a.integer(),
-     totalRounds: a.integer(),
      full: a.boolean(),
      players: a.string().array()
        .authorization(
@@ -107,7 +110,7 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'apiKey',
+    defaultAuthorizationMode: 'userPool',
     // API Key is used for a.allow.public() rules
     apiKeyAuthorizationMode: {
       expiresInDays: 30,

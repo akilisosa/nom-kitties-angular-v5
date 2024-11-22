@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { RoomService } from '../../services/room.service';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-quick-start',
@@ -18,9 +19,10 @@ import { MatButtonModule } from '@angular/material/button';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
+    MatButtonModule,
     MatIconModule,
-    MatButtonModule
+    MatSelectModule,
+    MatSlideToggleModule
   ],
   templateUrl: './quick-start.component.html',
   styleUrl: './quick-start.component.css'
@@ -35,12 +37,13 @@ export class QuickStartComponent implements OnInit {
   newGameForm = new FormGroup({
     public: new FormControl(true),
     mode: new FormControl('classic'),
-    rounds: new FormControl('3'),
-    timeLimit: new FormControl('30'),
-    currentPlayers: new FormControl('4'),
-    roomLimit: new FormControl('4'),
+    totalRounds: new FormControl(3),
+    timeLimit: new FormControl(30),
+    playersPerRound: new FormControl(4),
+    
+    roomLimit: new FormControl(4),
     simpleCode: new FormControl(''),
-    type: new FormControl('cat')
+    name:   new FormControl('example'),
   })
 
   constructor(private roomService: RoomService,
@@ -64,19 +67,15 @@ export class QuickStartComponent implements OnInit {
 
   async startGame() {
     // todo check for room generated code. 
-    const hostID = (await this.authService.getCurrentUser()).userId
+    const owner = (await this.authService.getCurrentUser()).userId
     
     await this.roomService.createNewRoom({
-      public: this.newGameForm.value.public?.toString() || 'true',
-      mode: this.newGameForm.value.mode,
-      rounds: Number(this.newGameForm.value.rounds),
-      timeLimit: Number(this.newGameForm.value.timeLimit),
-      currentPlayers: Number(this.newGameForm.value.currentPlayers),
-      roomLimit: Number(this.newGameForm.value.roomLimit),
-      simpleCode: this.newGameForm.value.simpleCode,
-      hostID,
+      ...this.newGameForm.value,
+      public: this.newGameForm.value.public ? 'public' : 'private',
+      players: [owner],
+      owner,
       status: 'WAITING',
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     })
 
     this.router.navigate(['game-hub', 'room', this.newGameForm.value.simpleCode]);

@@ -15,36 +15,38 @@
     </ng-container>
     <ng-container *ngIf="view === 'start'">
       <form [formGroup]="newGameForm">
+        <div class="flex-column">
         <mat-slide-toggle formControlName="public">
           {{ newGameForm.controls.public.value ? 'Public' : 'Private' }}
         </mat-slide-toggle>
         <mat-form-field appearance="fill">
           <mat-label>No of Players</mat-label>
-          <mat-select formControlName="currentPlayers">
-            <mat-option value="1">1</mat-option>
-            <mat-option value="2">2</mat-option>
-            <mat-option value="3">3</mat-option>
-            <mat-option value="4">4</mat-option>
+          <mat-select formControlName="playersPerRound">
+            <mat-option [value]="1">1</mat-option>
+            <mat-option [value]="2">2</mat-option>
+            <mat-option [value]="3">3</mat-option>
+            <mat-option [value]="4">4</mat-option>
           </mat-select>
         </mat-form-field>
         <mat-form-field appearance="fill">
           <mat-label>Time Limit</mat-label>
           <mat-select formControlName="timeLimit">
-            <mat-option value="10">10s</mat-option>
-            <mat-option value="20">20s</mat-option>
-            <mat-option value="30">30s</mat-option>
-            <mat-option value="60">60s</mat-option>
-            <mat-option value="90">90s</mat-option>
+            <mat-option [value]="10">10s</mat-option>
+            <mat-option [value]="20">20s</mat-option>
+            <mat-option [value]="30">30s</mat-option>
+            <mat-option [value]="60">60s</mat-option>
+            <mat-option [value]="90">90s</mat-option>
           </mat-select>
         </mat-form-field>
         <mat-form-field appearance="fill">
           <mat-label>Rounds</mat-label>
-          <mat-select formControlName="rounds">
-            <mat-option value="1">1</mat-option>
-            <mat-option value="2">2</mat-option>
-            <mat-option value="3">3</mat-option>
+          <mat-select formControlName="totalRounds">
+            <mat-option [value]="1">1</mat-option>
+            <mat-option [value]="2">2</mat-option>
+            <mat-option [value]="3">3</mat-option>
           </mat-select>
         </mat-form-field>
+      </div>
       </form>
       <button mat-raised-button color="primary" (click)="startGame()">Start A Game</button>
       <button mat-raised-button color="warn" (click)="view = 'quickstart'">Cancel</button>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { generateClient } from 'aws-amplify/api';
 import { BehaviorSubject, async } from 'rxjs';
+import { Schema } from '../../../../amplify/data/resource';
 // import type { Schema } from '@/amplify/data/resource' 
 
 @Injectable({
@@ -30,16 +31,18 @@ subscribeToRoomByID(id: any) {
 }
 
 async getRoomByCode(code: string) {
-  const client: any = generateClient<any>({ authMode: 'apiKey' })
+  const client = generateClient<Schema>({ authMode: 'apiKey' })
   let res;
   try {
-    res = (await client.models.Room.getBySimpleCode({ simpleCode: code })).data;
-    // res = (await client.graphql({
-    //   query: roomsBySimpleCode,
-    //   variables: {
-    //     simpleCode: code,
-    //   }
-    // })).data.roomsBySimpleCode.items[0]
+    // res = (await client.models.Room['getBySimpleCode']({ simpleCode: code })).data;
+    res = (await client.models.Room.list({
+      filter: {
+        simpleCode: {
+          eq: code
+        }
+      }
+    
+    })).data[0];
     this.room.next(res);
   } catch (error) {
     console.log(error);
@@ -48,20 +51,16 @@ async getRoomByCode(code: string) {
 }
 
 async createNewRoom(room: any) { //} CreateRoomInput) {
-  const client = generateClient({ authMode: 'userPool' })
+  const client: any = generateClient({ authMode: 'userPool' })
   let res;
-  // try {
-  //   res = (await client.graphql({
-  //     query: createRoom,
-  //     variables: {
-  //       input: room
-  //     }
-  //   })).data.createRoom;
-  //   console.log('room created', res);
-  //   this.room.next(res);
-  // } catch (error) {
-  //   console.log(error);
-  // }
+  try {
+    console.log(room);
+    res = (await client.models.Room.create(room)).data;
+    console.log('room created', res);
+    this.room.next(res);
+  } catch (error) {
+    console.log(error);
+  }
 
   return res;
 
