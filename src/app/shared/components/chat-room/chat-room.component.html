@@ -1,1 +1,28 @@
-<p>chat-room works!</p>
+<div #chatContainer id="chatContainer">
+    <ng-container *ngFor="let message of chatMessageList">
+      <div>
+        <mat-card>
+          <mat-card-header>
+            <mat-card-subtitle>
+              <div style="display:flex; flex-direction: row; align-items: center;">
+                {{message.playerName}}
+                <mat-icon svgIcon="kitty" [ngStyle]="{'color': message.playerID}"></mat-icon>
+              </div>
+            </mat-card-subtitle>
+            <mat-card-title>{{ message.content }}</mat-card-title>
+          </mat-card-header>
+        </mat-card>
+      </div>
+    </ng-container>
+  </div>
+  
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Message</mat-label>
+      <input matInput [formControl]="message" placeholder="Enter text">
+      <button mat-icon-button matSuffix (click)="sendChat()" aria-label="Send message">
+        <mat-icon>send</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+  <div style="margin:2rem"></div>

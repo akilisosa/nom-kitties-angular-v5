@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../shared/services/auth.service';
 import { RoomService } from '../../shared/services/room.service';
 import { ChatRoomComponent } from '../../shared/components/chat-room/chat-room.component';
-import { LobbyComponent } from './components/lobby/lobby.component';
+import { GameRoomComponent } from './components/game-room/game-room.component';
 
 @Component({
   standalone: true,
@@ -18,7 +18,7 @@ import { LobbyComponent } from './components/lobby/lobby.component';
     MatButtonModule,
     MatDialogModule,
     ChatRoomComponent,
-    LobbyComponent,
+    GameRoomComponent
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
@@ -146,10 +146,12 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   openChat() {
+    this.isModalOpen = true;
     this.dialog.open(this.chatDialog);
   }
 
   closeChat() {
+    this.isModalOpen = false;
     this.dialog.closeAll();
   }
 
