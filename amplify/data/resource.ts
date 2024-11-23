@@ -39,7 +39,6 @@ const schema = a.schema({
   Message: a.
   model({
     content: a.string().required(),
-    owner: a.string().required(),
     roomID: a.string().required(),
     createdAt: a.datetime().required(),
     color: a.string().required(),

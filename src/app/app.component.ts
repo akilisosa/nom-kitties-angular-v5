@@ -55,6 +55,10 @@ export class AppComponent {
       this.title = 'Online Hub'
     } else if(segment === 'learn-more') {
       this.title = 'Learn More'
+       } else if(segment === 'shop') {
+      this.title = 'Shop'
+       } else if(segment === 'feline-forum') {
+      this.title = 'Feline Forum'
     } else if(segment === 'room') {
       const urlSegments = this.router.url.split('/');
       let lastSegment = urlSegments[urlSegments.length - 1];

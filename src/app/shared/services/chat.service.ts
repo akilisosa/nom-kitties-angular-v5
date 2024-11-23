@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { generateClient } from 'aws-amplify/api';
+import { Schema } from '../../../../amplify/data/resource';
 // import { ModelSortDirection } from 'src/API';
 // import { createMessage, sendChatMessage } from 'src/graphql/mutations';
 // import { messagesByRoomIDAndCreatedAt } from 'src/graphql/queries';
@@ -17,24 +18,21 @@ export class ChatService {
   constructor() { }
 
   async sendChat(roomID: string, message: string, color: string, sender: string) {  
-    const client = generateClient({authMode: 'userPool'});
+    const client = generateClient<Schema>({authMode: 'userPool'});
     let res;
-    // try {
-    //   res = await client.graphql({
-    //     query: createMessage,
-    //     variables: {
-    //       input: {
-    //       roomID,
-    //       content: message,
-    //       playerID: color,
-    //       playerName: sender,
-    //       createdAt: new Date().toISOString(),
-    //       }
-    //     }
-    //   });
-    // } catch (error) {
-    //   console.error(error);
-    // }
+    try {
+      res = await client.models.Message.create({
+        roomID,
+        content: message,
+        color,
+        name: sender,
+        createdAt: new Date().toISOString(),
+   
+      });
+
+    } catch (error) {
+      console.error(error);
+    }
   }
 
  async getLastMessages(id: string) {

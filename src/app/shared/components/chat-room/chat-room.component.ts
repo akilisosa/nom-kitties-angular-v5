@@ -8,6 +8,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { ChatService } from '../../services/chat.service';
+import { GameDataService } from '../../../game-hub/room/services/game-data.service';
 
 
 @Component({
@@ -26,7 +27,7 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
 
 
-  @Input() id: string = '';
+  @Input() id: string = 'public';
   user: any = {};
 
   loading = false;
@@ -34,7 +35,9 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
   message = new FormControl('')
   chatMessageList: any[] = [];
 
-  constructor(private chatService: ChatService, private userService: UserService,) { }
+  constructor(private chatService: ChatService, 
+    private gameDataService: GameDataService,
+    private userService: UserService,) { }
 
   // listen to enter input
   @HostListener('document:keydown.enter', ['$event'])
@@ -47,6 +50,24 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
 
   ngOnInit() {
     this.getUser()
+
+    const messages = this.gameDataService.connect();
+
+    
+    this.subscription = messages.subscribe({
+      next: (message) => {
+        console.log('Received message:', message);
+        message = JSON.parse(message.event)
+        this.updateMessageList(message)
+      },
+      error: (error) => {
+        console.error('Error:', error);
+      }
+    });
+
+    setTimeout(() => {
+      this.gameDataService.subscribe(`/default/messages/${this.id}`);
+    }, 1000);
   }
 
   ngAfterViewInit() {
