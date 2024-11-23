@@ -1,4 +1,7 @@
-<div style="display:flex; flex-direction: row; justify-content: center;">
+<div class="flex-column" style="margin:auto; justify-content: center;">
     <canvas id="gameCanvas" #gameCanvas [width]="size" [height]="size" style="border: 1px solid black;"></canvas>
-    <!-- <app-controller></app-controller>     -->
+   <div class="flex-row" style="background-color: aqua; height: auto; width:100%; justify-content: center;">
+
+    <app-joystick (directionChange)="onDirectionChange($event)"></app-joystick>
+</div>
 </div>

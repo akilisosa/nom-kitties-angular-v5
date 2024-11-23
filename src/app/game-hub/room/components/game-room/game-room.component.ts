@@ -6,19 +6,19 @@ import { GameDataService } from '../../services/game-data.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { UserService } from '../../../../shared/services/user.service';
+import { CommonModule } from '@angular/common';
+import { JoystickComponent } from '../joystick/joystick.component';
 
 
 @Component({
   selector: 'app-game-room',
-  imports: [],
+  imports: [JoystickComponent, CommonModule],
   standalone: true,
   templateUrl: './game-room.component.html',
   styleUrl: './game-room.component.css'
 })
 export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('gameCanvas') gameCanvas!: ElementRef;
-  @ViewChild(ControllerComponent) controller!: ControllerComponent;
-
 
   @Input() room: any;
   @Input() size: number = 500;
@@ -111,6 +111,19 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(private gameDataService: GameDataService, private userService: UserService, private authService: AuthService) {
     this.gameLoop = this.gameLoop.bind(this);
+  }
+
+  onDirectionChange(keys: any) {
+    console.log('direction', keys);
+    this.keys = keys;
+
+    this.gameDataService.publishEvent('/default/messages', {
+      type: 'PLAYER_MOVE',
+      player: { ...this.player, id: this.owner },
+      keys: keys,
+      screenSize: this.size
+    })
+    // this.controller.direction = direction;
   }
 
 
