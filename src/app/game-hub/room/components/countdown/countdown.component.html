@@ -1,1 +1,6 @@
-<p>countdown works!</p>
+<div class="countdown-container" style="background-color: bisque;">
+    <div class="countdown-number" [@countdownAnimation]="countdown" style="background-color: bisque;">
+      {{ countdown / 1000 | number:'1.0-0' }}
+    </div>
+  </div>
+  

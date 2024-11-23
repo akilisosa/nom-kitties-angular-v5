@@ -22,6 +22,7 @@ import { CountdownComponent } from './components/countdown/countdown.component';
     ChatRoomComponent,
     LobbyComponent,
     GameRoomComponent,
+    CountdownComponent
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
@@ -66,7 +67,7 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
 
   ngOnInit() {
     this.getRoom();
-    this.subscribeToRoom();
+    // this.subscribeToRoom();
     this.getCurrentUser();
     this.mobile = this.isMobileDevice()
   }
@@ -142,10 +143,13 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
       this.roomDoesntExist();
     }
     else {
-       this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
+       this.subscription.add(this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
         this.room = { ...room };
-        console.log('room', room);
-      });
+
+        if(room.status === 'PLAYING') {
+          this.gameState = 'playing';
+        }
+      }));
 
     }
   }
@@ -153,7 +157,7 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
   subscribeToRoom() {
     this.subscription.add(this.roomService.room.subscribe(async (room) => {
       if (room) {
-        this.room = room;
+        this.room = {...room};
         const curr = await this.authService.getCurrentUser();
         if (this.room.owner !== curr.userId) {
           await this.joinGame(this.room.id, curr);
@@ -167,9 +171,14 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
   }
 
   startGame() { // 5 seconds in the future
-    this.roomService.startGame(this.room.id);
+    const gameStartTime =   new Date(Date.now() + 5000).toISOString();
+    this.roomService.startGame(this.room.id, gameStartTime);
     this.gameState = 'countdown';
     // this.gameState = 'playing';
+  }
+
+  playGame(){
+    this.gameState = 'playing';
   }
 
   openChat() {

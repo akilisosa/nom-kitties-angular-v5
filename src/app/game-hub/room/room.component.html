@@ -9,6 +9,7 @@
     <div id="lobbyContainer" #lobbyContainer style="width: 100%; height: 80vh;">
        <app-lobby (startGameEmit)="startGame()" *ngIf="gameState == 'lobby'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-lobby>
       <!-- <app-controller [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-controller> -->
+      <app-countdown (startGameEmit)="playGame()" *ngIf="gameState == 'countdown'" [room]="room"></app-countdown>
       <app-game-room *ngIf="gameState =='playing'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-game-room>
     </div>
   </div>

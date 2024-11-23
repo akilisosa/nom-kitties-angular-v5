@@ -103,14 +103,13 @@ async getRoomList() {
   return res;
 }
 
-async startGame(id: any) {
+async startGame(id: string, gameStartTime: string) {
   const client: any = generateClient({ authMode: 'userPool' })
   let res;
   try {
     res = (await client.models.Room.update({
       id,
-      gameStartTime:  new Date(Date.now() + 5000).toISOString(),
-      status: 'STARTING'
+      status: 'PLAYING'
     })).data;
     this.room.next(res);
   } catch (error) {
