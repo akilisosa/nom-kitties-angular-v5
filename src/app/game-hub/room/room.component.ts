@@ -11,7 +11,7 @@ import { ChatRoomComponent } from '../../shared/components/chat-room/chat-room.c
 import { GameRoomComponent } from './components/game-room/game-room.component';
 import { UserService } from '../../shared/services/user.service';
 import { LobbyComponent } from './components/lobby/lobby.component';
-
+import { CountdownComponent } from './components/countdown/countdown.component';
 @Component({
   standalone: true,
   imports: [
@@ -21,7 +21,7 @@ import { LobbyComponent } from './components/lobby/lobby.component';
     MatDialogModule,
     ChatRoomComponent,
     LobbyComponent,
-    GameRoomComponent
+    GameRoomComponent,
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
@@ -166,9 +166,10 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
     this.router.navigate(['/game-hub']);
   }
 
-  startGame() {
-   this.roomService.startGame(this.room.id);
-   this.gameState = 'playing';
+  startGame() { // 5 seconds in the future
+    this.roomService.startGame(this.room.id);
+    this.gameState = 'countdown';
+    // this.gameState = 'playing';
   }
 
   openChat() {

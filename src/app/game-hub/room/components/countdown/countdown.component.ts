@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 
 @Component({
   selector: 'app-countdown',
@@ -8,4 +8,8 @@ import { Component } from '@angular/core';
 })
 export class CountdownComponent {
 
+  @Input() room: any;
+  @Output() startGameEvent = new EventEmitter<void>();
+
+  constructor() { }
 }

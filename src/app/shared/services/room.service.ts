@@ -99,7 +99,7 @@ async getRoomList() {
   }
    catch (error) {
     console.log(error);
-  }
+  } 
   return res;
 }
 
@@ -109,7 +109,8 @@ async startGame(id: any) {
   try {
     res = (await client.models.Room.update({
       id,
-      status: 'PLAYING'
+      gameStartTime:  new Date(Date.now() + 5000).toISOString(),
+      status: 'STARTING'
     })).data;
     this.room.next(res);
   } catch (error) {

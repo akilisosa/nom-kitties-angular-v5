@@ -34,7 +34,6 @@ const schema = a.schema({
       allow.publicApiKey().to(['read']),
     ]),
 
-
       // message 
   Message: a.
   model({
@@ -67,7 +66,7 @@ const schema = a.schema({
      simpleCode: a.string().required(),
     
      name: a.string().required(),
-     status: a.enum(['WAITING', 'PLAYING', 'FINISHED', 'CANCELLED']),
+     status: a.enum(['WAITING', 'PLAYING', 'FINISHED', 'CANCELLED', 'STARTING']),
 
      full: a.boolean(),
 
