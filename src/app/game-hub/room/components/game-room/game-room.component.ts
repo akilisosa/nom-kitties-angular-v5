@@ -74,12 +74,6 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  private hasKeysChanged(prevKeys: Record<string, boolean>, currentKeys: Record<string, boolean>): boolean {
-    const keys = Object.keys(prevKeys);
-    return keys.some(key => prevKeys[key] !== currentKeys[key]);
-}
-
-
   @HostListener('window:keyup', ['$event'])
   handleKeyUp(event: KeyboardEvent) {
     // Check if the released key exists in our keys object
@@ -116,7 +110,6 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
       next: (message) => {
         console.log('Received message:', message);
         message = JSON.parse(message.event)
-        console.log(this.players)
         if( message.player.id === this.owner) return;
         if(message.type === 'PLAYER_MOVE') {
             this.players.set(message.player.id, { player: {...message.player, resize: true}, keys:  message.keys, screenSize: message.screenSize });
@@ -200,16 +193,12 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     // getScaledValue(50, this.size)
 
     drawKitty(this.ctx, this.player.x, this.player.y, this.player.size, this.size, '#040607');
-    // console.log('this.player', this.players);
 
     [...this.players.values()].forEach((playerData: any) => {
 
       if (!playerData.player) return;
 
       const { player, keys, screenSize } = playerData;
-
-      console.log( 'player', player, screenSize);
-      
       if(player.resize == true){
      player.x = player.x * this.size / screenSize;
     player.y = player.y * this.size / screenSize;
