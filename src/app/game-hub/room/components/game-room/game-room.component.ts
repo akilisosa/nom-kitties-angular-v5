@@ -198,6 +198,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+
+    this.subscription.unsubscribe();
   }
 
   stopGameLoop() {

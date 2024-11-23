@@ -10,6 +10,7 @@ import { AuthService } from '../../services/auth.service';
 import { RoomService } from '../../services/room.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-quick-start',
@@ -22,7 +23,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatButtonModule,
     MatIconModule,
     MatSelectModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './quick-start.component.html',
   styleUrl: './quick-start.component.css'
@@ -32,7 +34,7 @@ export class QuickStartComponent implements OnInit {
   @Input() showRefresh: boolean = false; 
   @Output() refreshEmit = new EventEmitter<void>();
 
-  view: 'quickstart' | 'start' | 'join' | 'private' = 'quickstart';
+  view: 'quickstart' | 'start' | 'join' | 'private' | 'loading' = 'quickstart';
 
   newGameForm = new FormGroup({
     public: new FormControl(true),
@@ -45,6 +47,12 @@ export class QuickStartComponent implements OnInit {
     simpleCode: new FormControl(''),
     name:   new FormControl('example'),
   })
+
+  joinGameForm = new FormGroup({
+    simpleCode: new FormControl(''),
+  })
+
+  loading = false;
 
   constructor(private roomService: RoomService,
     private router: Router,
@@ -67,6 +75,7 @@ export class QuickStartComponent implements OnInit {
 
   async startGame() {
     // todo check for room generated code. 
+    this.view = 'loading'
     const owner = (await this.authService.getCurrentUser()).userId
     
     await this.roomService.createNewRoom({
@@ -78,7 +87,14 @@ export class QuickStartComponent implements OnInit {
       createdAt: new Date().toISOString(),
     })
 
+    this.generate6DigitAlphaNumericCode();
+
+    
+    this.loading = false;
+
     this.router.navigate(['game-hub', 'room', this.newGameForm.value.simpleCode]);
+
+    
   }
 
   joinGame() {

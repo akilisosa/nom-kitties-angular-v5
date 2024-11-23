@@ -48,6 +48,10 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   gameState = 'lobby';
 
+  private lastCheck = 0;
+private readonly CHECK_INTERVAL = 100; // milliseconds
+
+
 
   subscription = new Subscription();
   constructor(private roomService: RoomService,
@@ -67,6 +71,13 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngAfterViewChecked() {
+
+    const now = Date.now();
+    if (now - this.lastCheck < this.CHECK_INTERVAL) {
+      return;
+    }
+    this.lastCheck = now;
+
     const width = this.lobbyContainer.nativeElement.clientWidth;
     const height = this.lobbyContainer.nativeElement.clientHeight;
     if (this.lobbyWidth !== width || this.lobbyHeight !== height) {
@@ -162,8 +173,8 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   startGame() {
-  
    this.roomService.startGame(this.room.id);
+   this.gameState = 'playing';
   }
 
   openChat() {

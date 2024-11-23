@@ -70,6 +70,17 @@ const schema = a.schema({
      status: a.enum(['WAITING', 'PLAYING', 'FINISHED', 'CANCELLED']),
 
      full: a.boolean(),
+
+     currentPlayers: a.string().array().authorization(
+       (allow: any) => [allow.owner(),
+       allow.authenticated().to(['read',]),
+       allow.publicApiKey().to(['read',])],
+     ),
+
+     gameStartTime: a.datetime(),
+
+     stats: a.string(), // JSON
+
      players: a.string().array()
        .authorization(
          (allow: any) => [allow.owner(),

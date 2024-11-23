@@ -9,7 +9,7 @@
     <div id="lobbyContainer" #lobbyContainer style="width: 100%; height: 80vh;">
        <app-lobby (startGameEmit)="startGame()" *ngIf="gameState == 'lobby'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-lobby>
       <!-- <app-controller [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-controller> -->
-      <app-game-room *ngIf="gameState =='classic'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-game-room>
+      <app-game-room *ngIf="gameState =='playing'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-game-room>
     </div>
   </div>
   

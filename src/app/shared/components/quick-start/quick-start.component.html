@@ -1,4 +1,8 @@
 <div class="flex-column" style="justify-content: center; margin:1rem;">
+  <ng-container *ngIf="view === 'loading'">
+    <mat-spinner></mat-spinner>
+  </ng-container>
+
     <ng-container *ngIf="view === 'quickstart'">
       <button mat-raised-button color="primary" (click)="view = 'start'">
         Start A Game &nbsp;<mat-icon>rocket</mat-icon>
@@ -9,7 +13,7 @@
       <button mat-raised-button color="accent" *ngIf="showRefresh" (click)="refreshEmit.emit()">
         Refresh List &nbsp;<mat-icon>refresh</mat-icon>
       </button>
-      <button mat-raised-button color="warn" (click)="joinPrivate()">
+      <button mat-raised-button color="warn" (click)="view = 'private'">
         Enter A Code &nbsp;<mat-icon>code</mat-icon>
       </button>
     </ng-container>
@@ -49,6 +53,20 @@
       </div>
       </form>
       <button mat-raised-button color="primary" (click)="startGame()">Start A Game</button>
+      <button mat-raised-button color="warn" (click)="view = 'quickstart'">Cancel</button>
+    </ng-container>
+
+
+    <ng-container *ngIf="view === 'private'">
+      <form [formGroup]="joinGameForm">
+        <div style=" margin:auto; display:flex; justify-content: center;">
+        <mat-form-field appearance="fill" style="width:100%; max-width: 300px;">
+          <mat-label>Enter Code</mat-label>
+          <input matInput formControlName="simpleCode" maxLength="6">
+        </mat-form-field>
+      </div>
+      </form>
+      <button mat-raised-button color="primary" (click)="joinGame()">Join Game</button>
       <button mat-raised-button color="warn" (click)="view = 'quickstart'">Cancel</button>
     </ng-container>
   </div>

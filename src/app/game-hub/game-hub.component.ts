@@ -26,6 +26,7 @@ import { MatRippleModule } from '@angular/material/core';
 })
 export class GameHubComponent implements OnInit {
 
+
   roomList: any[] = [];
   subscription = new Subscription();
   constructor(private roomService: RoomService, private router: Router) { }
@@ -33,6 +34,10 @@ export class GameHubComponent implements OnInit {
   ngOnInit() {
     this.roomService.getRoomList();
     this.subscribeToRoomList();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   subscribeToRoomList() {
@@ -45,6 +50,10 @@ export class GameHubComponent implements OnInit {
   // const success =  await this.roomService.joinRoom(game.id);
   await this.router.navigate(['game-hub', 'room', game.simpleCode]);
   }
+
+  refreshList() {
+    this.roomService.getRoomList();
+    }
   
 }
 
