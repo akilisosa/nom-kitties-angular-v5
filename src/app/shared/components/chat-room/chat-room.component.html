@@ -1,16 +1,16 @@
-<div #chatContainer id="chatContainer" class="chat-container">
-  <div class="chat-content">
+<div  class="chat-container">
+  <div class="chat-content" #chatContainer id="chatContainer">
     <ng-container *ngFor="let message of chatMessageList">
       <div>
         <mat-card>
           <mat-card-header>
             <mat-card-subtitle>
               <div style="display:flex; flex-direction: row; align-items: center;">
-                {{message.playerName}}
-                <mat-icon svgIcon="kitty" [ngStyle]="{'color': message.playerID}"></mat-icon>
+                <mat-icon svgIcon="kitty" [ngStyle]="{'color': message.user.color}"></mat-icon>
+                {{message.user.name}}
               </div>
             </mat-card-subtitle>
-            <mat-card-title>{{ message.content }}</mat-card-title>
+            <mat-card-title>{{ message.message }}</mat-card-title>
           </mat-card-header>
         </mat-card>
       </div>

@@ -119,24 +119,6 @@ export class GameDataService {
   publishEvent(channelName: string, eventData: any) {
     const endpoint = `https://${this.HTTP_DOMAIN}/event`;
     
-    const mutation = {
-      query: `mutation PublishEvent($channelName: String!, $event: AWSJSON!) {
-        publish(channelName: $channelName, event: $event) {
-          event
-        }
-      }`,
-      variables: {
-        channelName: channelName,
-        type: 'data',
-        event: JSON.stringify(eventData)
-      }
-    };
-
-    const data = {
-      type: 'data',
-      channel: channelName,
-      event: JSON.stringify(eventData)
-    }
     return fetch(endpoint, {
       "method": "POST",
       "headers": {
@@ -164,7 +146,7 @@ export class GameDataService {
         'x-api-key': this.API_KEY,
         host: this.HTTP_DOMAIN
       },
-      event: "data"
+      event: data
     };
 
     this.ws.send(JSON.stringify(message));

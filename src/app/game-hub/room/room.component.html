@@ -14,16 +14,23 @@
   </div>
   
   <ng-template #chatDialog>
+
     <h2 mat-dialog-title>
-      <div style="display:flex; flex-direction: row; align-items: center;">
+      <div style="display:flex; flex-direction: row; align-items: center; justify-content: space-between;">
+          <div style="display:flex; flex-direction: row; align-items: center;">
         <img src="assets/icon/favicon.png" style="width: 30px; height: 30px; margin-inline-end: 1rem;">
         Chat: {{ room?.simpleCode }}
       </div>
+
+        <mat-dialog-actions>
+          <button mat-button (click)="closeChat()">Close</button>
+        </mat-dialog-actions>
+      </div>
+
+  
     </h2>
     <mat-dialog-content>
       <app-chat-room [id]="room.id"></app-chat-room>
     </mat-dialog-content>
-    <mat-dialog-actions>
-      <button mat-button (click)="closeChat()">Close</button>
-    </mat-dialog-actions>
+
   </ng-template>

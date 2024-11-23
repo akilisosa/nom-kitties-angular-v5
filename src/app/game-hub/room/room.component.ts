@@ -159,7 +159,13 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   openChat() {
     this.isModalOpen = true;
-    this.dialog.open(this.chatDialog);
+    this.dialog.open(this.chatDialog, {
+      width: '100%',
+      height: '100%',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      panelClass: 'full-screen-dialog'
+    });
   }
 
   closeChat() {

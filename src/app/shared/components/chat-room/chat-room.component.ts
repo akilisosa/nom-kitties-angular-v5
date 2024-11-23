@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { ChatService } from '../../services/chat.service';
 import { GameDataService } from '../../../game-hub/room/services/game-data.service';
+import { DomSanitizer } from '@angular/platform-browser';
+
 
 
 @Component({
@@ -19,6 +21,7 @@ import { GameDataService } from '../../../game-hub/room/services/game-data.servi
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+
     ReactiveFormsModule],
   templateUrl: './chat-room.component.html',
   styleUrl: './chat-room.component.css'
@@ -37,7 +40,13 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
 
   constructor(private chatService: ChatService, 
     private gameDataService: GameDataService,
-    private userService: UserService,) { }
+    private userService: UserService,
+    private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
+      this.matIconRegistry.addSvgIcon(
+        'kitty',
+        this.domSanitizer.bypassSecurityTrustResourceUrl('assets/svg/kitty.svg')
+      );
+    }
 
   // listen to enter input
   @HostListener('document:keydown.enter', ['$event'])
@@ -90,7 +99,14 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
   async sendChat() {
     this.loading = true;
     if (this.message.value) {
-      await this.chatService.sendChat(this.id, this.message.value, this.user.color, this.user.name,);
+      this.gameDataService.publishEvent(`/default/messages/${this.id}`, {
+        type: 'CHAT',
+        message: this.message.value,
+        user: this.user,
+        id: this.id,
+        timestamp: new Date().getTime()
+      })
+     // await this.chatService.sendChat(this.id, this.message.value, this.user.color, this.user.name,);
       this.message.setValue('');
      // this.scrollToBottom();
     }
@@ -126,6 +142,7 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
   }
 
   updateMessageList(message: any) {
+    console.log(message);
     this.chatMessageList.push(message);
     if (this.chatMessageList.length > 20) {
       this.chatMessageList.shift();
