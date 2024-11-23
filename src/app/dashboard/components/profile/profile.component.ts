@@ -50,6 +50,7 @@ export class ProfileComponent implements OnInit {
     const user = this.userService.user.getValue()
     if(!user) {
      this.user =  await this.userService.getUser();
+     console.log('user', this.user);
      if(!this.user) {
       this.user = await this.userService.save(this.form.value);
      }
@@ -70,7 +71,8 @@ export class ProfileComponent implements OnInit {
 
   async save() {
     this.loading = true;
-   await this.userService.save(this.form.value);
+  const user= await this.userService.save(this.form.value);
+    console.log('user', user);
    this.form.markAsPristine();
    this.loading = false;
   }

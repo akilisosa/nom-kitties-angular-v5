@@ -61,6 +61,7 @@ async createNewRoom(room: any) { //} CreateRoomInput) {
   let res;
   try {
     res = (await client.models.Room.create(room)).data;
+
     this.room.next(res);
   } catch (error) {
     console.error(error);
@@ -71,21 +72,13 @@ async createNewRoom(room: any) { //} CreateRoomInput) {
 }
 
 async deleteRoom(id: any) {
-  const client = generateClient({ authMode: 'userPool' })
+  const client = generateClient<Schema>({ authMode: 'userPool' })
   let res;
-  // try {
-  //   res = await client.graphql({
-  //     query: deleteRoom,
-  //     variables: {
-  //       input: {
-  //         id
-  //       }
-  //     }
-  //   })
-  //   this.removeFromRoomList(id);
-  // } catch (error) {
-  //   console.log(error);
-  // }
+ let d =  (await client.models.Room.delete({ id })).data;
+ let roomList = this.roomList.getValue();
+  roomList = roomList.filter((room) => room.id !== id);
+  this.roomList.next(roomList);
+  this.room.next(null);
 }
 
 removeFromRoomList(id: string) {

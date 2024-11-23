@@ -19,6 +19,10 @@ html, body {
   flex-direction: row;
 }
 
+.pointer {
+  cursor: pointer;
+}
+
 /* If you still see margins, you can be more aggressive with: */
 /* * {
   margin: 0;

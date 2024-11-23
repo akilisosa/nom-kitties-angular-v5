@@ -19,6 +19,16 @@
           <mat-icon>home</mat-icon>&nbsp;
           <span style="margin-left: 8px;">Home</span>
         </a>
+        <a mat-list-item routerLink="/game-hub" (click)="isSidebarOpen = false">
+          <mat-icon>public</mat-icon>&nbsp;
+          <span style="margin-left: 8px;">Play Online</span>
+        </a>
+
+        <a mat-list-item routerLink="/dashboard" (click)="isSidebarOpen = false">
+          <mat-icon>dashboard</mat-icon>&nbsp;
+          <span style="margin-left: 8px;">Dashboard</span>
+        </a>
+
         <a mat-list-item routerLink="/local-game" (click)="isSidebarOpen = false">
           <mat-icon>sports_esports</mat-icon>&nbsp;
           <span style="margin-left: 8px;">Local Game</span>

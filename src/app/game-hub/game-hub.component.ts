@@ -8,6 +8,7 @@ import { QuickStartComponent } from '../shared/components/quick-start/quick-star
 import { RoomService } from '../shared/services/room.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { MatRippleModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-game-hub',
@@ -17,7 +18,8 @@ import { Subscription } from 'rxjs';
     MatButtonModule,
     MatIconModule,
     MatListModule,
-    QuickStartComponent
+    QuickStartComponent,
+    MatRippleModule
   ],
   templateUrl: './game-hub.component.html',
   styleUrl: './game-hub.component.css'
