@@ -17,3 +17,10 @@
   mat-sidenav-content {
     padding: 20px;
   }
+
+  .butt {
+    display:flex;
+    align-items: center;
+  }
+
+  

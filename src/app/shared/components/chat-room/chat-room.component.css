@@ -1,7 +1,7 @@
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Full viewport height */
+    height: 100%; /* Full viewport height */
     padding: 1rem;
     flex-grow: 1; /* Take up available space */
     width: 100%;

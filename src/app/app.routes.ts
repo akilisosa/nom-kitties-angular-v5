@@ -38,9 +38,17 @@ export const routes: Routes = [
     },
 
     {
+        path: 'feline-forum',
+        loadComponent: () =>
+           import('./feline-forum/feline-forum.component').then((m) => m.FelineForumComponent),
+        canActivate: [authGuard],
+    },
+
+    {
         path: 'game-hub/room/:id',
         loadComponent: () =>
             import('./game-hub/room/room.component').then((m) => m.RoomComponent),
+        canActivate: [authGuard],
     },
     {
         path: 'learn-more',
@@ -48,6 +56,15 @@ export const routes: Routes = [
             import('./learn-more/learn-more.component').then(
                 (m) => m.LearnMoreComponent
             ),
-    }
+    },
+
+    {
+        path: 'shop',
+        loadComponent: () =>
+            import('./shop/shop.component').then(
+                (m) => m.ShopComponent
+            ),
+    },
+
 
 ];

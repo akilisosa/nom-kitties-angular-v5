@@ -1,46 +1,71 @@
 <mat-toolbar color="primary">
-    <button mat-icon-button (click)="toggleSidebar()">
-      <mat-icon>menu</mat-icon>
-    </button>
-    <!-- <span>Nom Kitties</span> -->
+  <button mat-icon-button (click)="toggleSidebar()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <!-- <span>Nom Kitties</span> -->
 
-    <span style="display:flex; flex-direction: row; align-items: center;">
-      <!-- <div style="display:flex; flex-direction: row; align-items: center;"> -->
-        <img src="assets/icon/favicon.png" style="width: 30px; height: 30px; margin-inline-end: 1rem;">
-        {{title}}
-      <!-- </div> -->
-    </span>
-  </mat-toolbar>
-  
-  <mat-sidenav-container class="sidenav-container">
-    <mat-sidenav #sidenav mode="side" [(opened)]="isSidebarOpen">
-      <mat-nav-list>
-        <a mat-list-item routerLink="/home" (click)="isSidebarOpen = false">
+  <span style="display:flex; flex-direction: row; align-items: center;">
+    <!-- <div style="display:flex; flex-direction: row; align-items: center;"> -->
+    <img src="assets/icon/favicon.png" style="width: 30px; height: 30px; margin-inline-end: 1rem;">
+    {{title}}
+    <!-- </div> -->
+  </span>
+</mat-toolbar>
+
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav mode="side" [(opened)]="isSidebarOpen">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/home" class="butt" (click)="isSidebarOpen = false">
+        <span class="butt">
           <mat-icon>home</mat-icon>&nbsp;
           <span style="margin-left: 8px;">Home</span>
-        </a>
-        <a mat-list-item routerLink="/game-hub" (click)="isSidebarOpen = false">
+        </span>
+      </a>
+      <a mat-list-item routerLink="/game-hub" class="butt" (click)="isSidebarOpen = false">
+        <span class="butt">
           <mat-icon>public</mat-icon>&nbsp;
           <span style="margin-left: 8px;">Play Online</span>
-        </a>
+        </span>
+      </a>
 
-        <a mat-list-item routerLink="/dashboard" (click)="isSidebarOpen = false">
+      <a mat-list-item routerLink="/dashboard" class="butt" (click)="isSidebarOpen = false">
+        <span class="butt">
           <mat-icon>dashboard</mat-icon>&nbsp;
           <span style="margin-left: 8px;">Dashboard</span>
-        </a>
+        </span>
+      </a>
 
-        <a mat-list-item routerLink="/local-game" (click)="isSidebarOpen = false">
+
+      <a mat-list-item routerLink="/feline-forum" class="butt" (click)="isSidebarOpen = false">
+        <span class="butt">
+          <mat-icon>forum</mat-icon>&nbsp;
+          <span style="margin-left: 8px;">Feline Forum</span>
+        </span>
+      </a>
+
+      <a mat-list-item routerLink="/local-game" class="butt" (click)="isSidebarOpen = false">
+        <span class="butt">
           <mat-icon>sports_esports</mat-icon>&nbsp;
-          <span style="margin-left: 8px;">Local Game</span>
-        </a>
-        <a mat-list-item routerLink="/learn-more" (click)="isSidebarOpen = false">
+          <span style="margin-left: 8px;"> Local Game</span>
+        </span>
+      </a>
+      <a mat-list-item routerLink="/learn-more" class="butt" (click)="isSidebarOpen = false">
+        <span class="butt">
           <mat-icon>help_outline</mat-icon>&nbsp;
           <span style="margin-left: 8px;">Learn More</span>
-        </a>
- 
-      </mat-nav-list>
-    </mat-sidenav>
-    <mat-sidenav-content>
-<router-outlet></router-outlet>
-</mat-sidenav-content>
+        </span>
+      </a>
+
+      <a mat-list-item routerLink="/shop" class="butt" (click)="isSidebarOpen = false">
+        <span class="butt">
+          <mat-icon>shopping_bag</mat-icon>&nbsp;
+          <span style="margin-left: 8px;">Shop</span>
+        </span>
+      </a>
+
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
 </mat-sidenav-container>
