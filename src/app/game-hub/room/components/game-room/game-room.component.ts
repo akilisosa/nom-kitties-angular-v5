@@ -213,7 +213,6 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
 
   consumeCollectible(player: any, width: number, collectibles: any[]) {
-    console.log('collectible consumed');
     this.gameDataService.publishEvent('/default/messages', {
       type: 'PLAYER_SCORE',
       player: { ...this.player, id: this.owner, },
@@ -224,11 +223,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
     this.collectibles = collectibles;
     
-
-    if(player.id === this.room.owner) {
-      spawnCollectible(this.COLLECTIBLE_RADIUS, this.obstacles, this.size, this.collectibles, this.treatsOnFloor);
-      this.newCollectibles(this.collectibles)
-    }
+    
 
   }
 
