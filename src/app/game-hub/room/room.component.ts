@@ -9,6 +9,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { RoomService } from '../../shared/services/room.service';
 import { ChatRoomComponent } from '../../shared/components/chat-room/chat-room.component';
 import { GameRoomComponent } from './components/game-room/game-room.component';
+import { UserService } from '../../shared/services/user.service';
 
 @Component({
   standalone: true,
@@ -41,6 +42,8 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   fullScreen = false;
   roomCode = '';
 
+  kitty: any = {};
+
 
   subscription = new Subscription();
   constructor(private roomService: RoomService,
@@ -48,6 +51,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
+    private userService: UserService,
     private authService: AuthService) { 
       this.roomCode = this.route.snapshot.paramMap.get('id')!;
     }
@@ -55,6 +59,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   ngOnInit() {
     this.getRoom();
     this.subscribeToRoom();
+    this.getCurrentUser();
   }
 
   ngAfterViewChecked() {
@@ -75,6 +80,10 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  async getCurrentUser() {
+    const kitty = await this.userService.getUser();
   }
 
   async cancel() {

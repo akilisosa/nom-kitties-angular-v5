@@ -4,9 +4,17 @@ export const getScaledValue = (value: number, size: number) => {
         return value * scaleFactor;
       }
 
-export const drawKitty = (ctx: any, x: number, y: number, width: number, size: number, color: string = '#040607') => {
+export const drawKitty = (ctx: any, x: number, y: number, width: number, size: number, color: string = '#040607', resize?:boolean) => {
 
-    const scale = width / 50; // SVG viewBox is 50x50
+  // if(resize){
+  //   width = getScaledValue(50, size);
+  //   // x = getScaledValue(x, size);
+  //   // y = getScaledValue(y, size);
+  // }
+  
+
+    const scale = width / 50; // SVG viewBox is 50x50w
+    
 
     ctx.save();
     ctx.translate(x, y);
