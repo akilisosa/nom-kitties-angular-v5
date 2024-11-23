@@ -72,6 +72,22 @@ export class QuickStartComponent implements OnInit {
     return code;
   }
 
+  async joinGameWithCode() {
+    this.view = 'loading'
+    const code = this.joinGameForm.value.simpleCode;
+    if (!code) {
+      this.view = 'join';
+      return;
+    }
+    const room = await this.roomService.getRoomByCode(code);
+    if (!room) {
+      this.view = 'join';
+      return;
+    }
+    this.router.navigate(['game-hub', 'room', code]);
+  
+  }
+
 
   async startGame() {
     // todo check for room generated code. 

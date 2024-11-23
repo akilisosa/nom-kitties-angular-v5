@@ -182,6 +182,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges() {
+
+    console.log('game room changes', this.size);
     if (this.size > 0 && !this.isModalOpen) {
       this.drawCanvas();
       this.player.size = getScaledValue(50, this.size);

@@ -86,17 +86,13 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
 
     const width = this.lobbyContainer.nativeElement.clientWidth;
     const height = this.lobbyContainer.nativeElement.clientHeight;
-    console.log('width', this.gameSize)
     if (this.lobbyWidth !== width || this.lobbyHeight !== height) {
-      this.lobbyWidth = width;
-      this.lobbyHeight = height;
-
-      this.gameSize = Math.min(width, height) - 5;
-      console.log('width', this.gameSize)
+      this.lobbyWidth = Math.min(width, 600);
+      this.lobbyHeight = Math.min(height, 600);
+      this.gameSize = Math.min(this.lobbyWidth,  this.lobbyHeight) - 5;
       if (this.gameSize > 600) {
         this.gameSize = 600;
       }
-
       this.cdr.detectChanges();
     }
 
@@ -112,10 +108,6 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
 
   async cancel() {
     this.isModalOpen = false;
-  }
-
-  onWillDismiss(event: Event) {
-
   }
 
   async joinGame(id: string, curr: any) {
@@ -155,14 +147,7 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
         console.log('room', room);
       });
 
-      // .subscribe((room) => {
-      //   this.room = { ...room };
-      //   console.log('room', room);
-      // });
     }
-    // if (this.room.owner !== curr.userId) {
-    //   await this.joinGame(this.room.id, curr);
-    // }
   }
 
   subscribeToRoom() {
