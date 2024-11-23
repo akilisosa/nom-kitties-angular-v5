@@ -1,7 +1,9 @@
 export const getScaledValue = (value: number, size: number) => {
 
   const scaleFactor = size / 600;
-  return value * scaleFactor;
+  return Math.round(value * scaleFactor);
+
+  
 }
 
 export  const generateRandomPosition = (collectibleRadius: number, obstacleList: any[], size: number): { x: number, y: number } => {

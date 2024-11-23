@@ -5,6 +5,7 @@ import { GameDataService } from '../../services/game-data.service';
 // import { GameEventsService } from '../../services/game-events.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { UserService } from '../../../../shared/services/user.service';
 
 
 @Component({
@@ -34,11 +35,12 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   owner = '1';
 
   player = {
+    id: '1',
     x: 50,
     y: 50,
     size: 50,
     speed: 5,
-    color: 'red',
+    color: '#000000',
   }
 
   keys = {
@@ -107,7 +109,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  constructor(private gameDataService: GameDataService, private authService: AuthService) {
+  constructor(private gameDataService: GameDataService, private userService: UserService, private authService: AuthService) {
     this.gameLoop = this.gameLoop.bind(this);
   }
 
@@ -128,7 +130,18 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
           this.players.set(message.player.id, { player: { ...message.player, resize: true }, keys: message.keys, screenSize: message.screenSize });
         }
         if (message.type === 'COLLECTIBLES') {
-          this.collectibles = message.collectibles;
+          // resize
+          //if (message.player?.id === this.owner) return;
+         // this.collectibles = message.collectibles.map((collectible: any) => ({ ...collectible, x:((collectible.x/ this.size)*collectible.size), y:((collectible.y/this.size)*collectible.size) }));
+         console.log('COLLECTIBLES',message)
+          // resize collectibles
+          message.event.collectibles.forEach((collectible: any) => {
+            collectible.x = ((collectible.x / message.event.size) * this.size);
+            collectible.y = ((collectible.y / message.event.size) * this.size);
+          });
+         
+          this.collectibles = message.event.collectibles;
+
         }
         if (message.type === 'PLAYER_SCORE') {
     this.playerScore(message)
@@ -147,6 +160,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
   async setOwner() {
     this.owner = (await this.authService.getCurrentUser()).userId;
+    const kitty = (await this.userService.getUser());
+    this.player = { ...this.player, color: kitty?.color || '#000000', id: this.owner };
   }
 
   playerScore(message: any){
@@ -158,6 +173,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
       this.drawCanvas();
       this.player.size = getScaledValue(50, this.size);
       this.player.speed = getScaledValue(5, this.size);
+      this.COLLECTIBLE_RADIUS = getScaledValue(10, this.size);
     }
     if (this.isModalOpen) {
       this.stopGameLoop();
@@ -179,12 +195,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   }
 
 
-  publishCollectibles(collectibles: any[]) {
-    this.gameDataService.publishEvent('/default/messages', {
-      type: 'COLLECTIBLES',
-      collectibles
-    })
-  }
+
 
 
   drawCanvas() {
@@ -216,7 +227,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
     if(player.id === this.room.owner) {
       spawnCollectible(this.COLLECTIBLE_RADIUS, this.obstacles, this.size, this.collectibles, this.treatsOnFloor);
-      this.publishCollectibles(this.collectibles)
+      this.newCollectibles(this.collectibles)
     }
 
   }
@@ -271,7 +282,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   newCollectibles(collectibles: any[]) {
     this.gameDataService.publishEvent('/default/messages', {
       type: 'COLLECTIBLES',
-      collectibles
+      event: {collectibles, size: this.size},
     })
   }
 
@@ -338,10 +349,13 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     // Draw collectibles
+    const pi2 = Math.PI * 2;
     this.collectibles.forEach(collectible => {
       if (collectible.active) {
         this.ctx.beginPath();
-        this.ctx.arc(collectible.x, collectible.y, collectible.radius, 0, Math.PI * 2);
+        this.ctx.arc(collectible.x, collectible.y, this.COLLECTIBLE_RADIUS, 0,pi2);
+        // this.ctx.arc(collectible.x * this.size / collectible.size, collectible.x * this.size / collectible.size, collectible.radius, 0, Math.PI * 2);
+      //  console.log(collectible.x, collectible.x * this.size / collectible)
         this.ctx.fillStyle = collectible.color;
         this.ctx.fill();
         this.ctx.closePath();

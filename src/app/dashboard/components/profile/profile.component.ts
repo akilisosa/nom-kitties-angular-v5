@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -38,7 +39,9 @@ export class ProfileComponent implements OnInit {
 
   loading = false;
 
-  constructor(private userService: UserService, private cdr: ChangeDetectorRef) { }
+  constructor(private userService: UserService,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.subcribeToUser();
@@ -52,7 +55,8 @@ export class ProfileComponent implements OnInit {
      this.user =  await this.userService.getUser();
      console.log('user', this.user);
      if(!this.user) {
-      this.user = await this.userService.save(this.form.value);
+      const owner = (await this.authService.getCurrentUser()).userId
+      this.user = await this.userService.save({...this.form.value, owner});
      }
     }
     this.loading = false;

@@ -34,9 +34,9 @@ export class UserService {
     } catch (error) {
       console.error(error);
     }
-    // this.user.next(res?.data.usersByOwner.items[0]);
-    // return res?.data.usersByOwner.items[0];
-    return
+    this.user.next(res);
+    return res;
+
   }
   
 

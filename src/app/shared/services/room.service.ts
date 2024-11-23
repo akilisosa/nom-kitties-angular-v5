@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { generateClient } from 'aws-amplify/api';
-import { BehaviorSubject, async } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { Schema } from '../../../../amplify/data/resource';
 // import type { Schema } from '@/amplify/data/resource' 
 
@@ -30,17 +30,12 @@ subscribeToRoomByID(id: any) {
   let res;
  return client.models.Room.onUpdate({ filter: { id: { eq: id } } })
  
-//  .subscribe((room: any) => {
-//   console.log('subscribing to room:', room)
-//   this.room.next(room.data.onUpdateRoom);
-//   });
 }
 
 async getRoomByCode(code: string) {
   const client = generateClient<Schema>({ authMode: 'apiKey' })
   let res;
   try {
-    // res = (await client.models.Room['getBySimpleCode']({ simpleCode: code })).data;
     res = (await client.models.Room.list({
       filter: {
         simpleCode: {
@@ -56,7 +51,7 @@ async getRoomByCode(code: string) {
   return res;
 }
 
-async createNewRoom(room: any) { //} CreateRoomInput) {
+async createNewRoom(room: any) {
   const client: any = generateClient({ authMode: 'userPool' })
   let res;
   try {
