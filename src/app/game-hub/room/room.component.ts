@@ -10,6 +10,7 @@ import { RoomService } from '../../shared/services/room.service';
 import { ChatRoomComponent } from '../../shared/components/chat-room/chat-room.component';
 import { GameRoomComponent } from './components/game-room/game-room.component';
 import { UserService } from '../../shared/services/user.service';
+import { LobbyComponent } from './components/lobby/lobby.component';
 
 @Component({
   standalone: true,
@@ -19,6 +20,7 @@ import { UserService } from '../../shared/services/user.service';
     MatButtonModule,
     MatDialogModule,
     ChatRoomComponent,
+    LobbyComponent,
     GameRoomComponent
   ],
   templateUrl: './room.component.html',
@@ -43,6 +45,8 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   roomCode = '';
 
   kitty: any = {};
+
+  gameState = 'lobby';
 
 
   subscription = new Subscription();
@@ -155,6 +159,11 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   roomDoesntExist() {
     this.router.navigate(['/game-hub']);
+  }
+
+  startGame() {
+  
+   this.roomService.startGame(this.room.id);
   }
 
   openChat() {

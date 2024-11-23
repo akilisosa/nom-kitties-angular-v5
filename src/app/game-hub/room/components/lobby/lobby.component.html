@@ -1,3 +1,7 @@
 <div style="display:flex; flex-direction: row; justify-content: center;">
     <canvas id="gameCanvas" #gameCanvas [width]="size" [height]="size" style="border: 1px solid black;"></canvas>
     </div>
+
+    <div style="display:flex; flex-direction: row; justify-content: center;">
+        <button mat-raised-button color="primary" (click)="startGameEmit.emit()">Start Game</button>
+    </div>

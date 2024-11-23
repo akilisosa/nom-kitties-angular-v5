@@ -10,6 +10,7 @@ import { Schema } from '../../../../amplify/data/resource';
 export class RoomService {
 
 
+
 room = new BehaviorSubject<any>(null);
 
 roomList = new BehaviorSubject<any[]>([]);
@@ -102,12 +103,28 @@ async getRoomList() {
   return res;
 }
 
-async updateRoomWithPlayer(roomID: string, players: any[]) {
+async startGame(id: any) {
   const client: any = generateClient({ authMode: 'userPool' })
   let res;
   try {
     res = (await client.models.Room.update({
-      id: roomID,
+      id,
+      status: 'PLAYING'
+    })).data;
+    this.room.next(res);
+  } catch (error) {
+    console.error(error);
+  }
+
+  return res;
+}
+
+async updateRoomWithPlayer(id: string, players: any[]) {
+  const client: any = generateClient({ authMode: 'userPool' })
+  let res;
+  try {
+    res = (await client.models.Room.update({
+      id,
       players
     })).data;
     // res = await client.graphql({

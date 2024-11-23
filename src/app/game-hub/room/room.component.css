@@ -1,0 +1,25 @@
+.container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+/* Media query for mobile devices */
+@media screen and (max-width: 768px) {
+    .container {
+        height: calc(100vh - 56px); /* Adjust if you have a header */
+    }
+
+    #lobbyContainer {
+        height: calc(100vh - 100px) !important; /* Ensures content fits on mobile */
+    }
+
+    .button-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        background: white; /* Or your app's background color */
+        padding: 1rem;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    }
+}
