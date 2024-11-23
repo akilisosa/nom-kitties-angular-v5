@@ -21,7 +21,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('gameCanvas') gameCanvas!: ElementRef;
 
   @Input() room: any;
-  @Input() size: number = 500;
+  @Input() size: number = 600;
   @Input() playerList: any[] = []
   @Input() isModalOpen: boolean = false;
   @Input() direction = '';
@@ -219,7 +219,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
       this.animationFrameId = null;
     }
 
-    this.canvas = this.gameCanvas.nativeElement;
+    this.canvas = this.gameCanvas?.nativeElement;
+    if(!this.canvas) return;
     this.ctx = this.canvas.getContext('2d');
     this.ctx.fillStyle = '#ebebd3';
     this.ctx.fillRect(0, 0, this.size, this.size);

@@ -45,7 +45,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   roomCode = '';
 
   kitty: any = {};
-
+  mobile = false;
   gameState = 'lobby';
 
   private lastCheck = 0;
@@ -68,6 +68,12 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
     this.getRoom();
     this.subscribeToRoom();
     this.getCurrentUser();
+    this.mobile = this.isMobileDevice()
+  }
+
+  private isMobileDevice(): any {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
   }
 
   ngAfterViewChecked() {
@@ -80,14 +86,17 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
 
     const width = this.lobbyContainer.nativeElement.clientWidth;
     const height = this.lobbyContainer.nativeElement.clientHeight;
+    console.log('width', this.gameSize)
     if (this.lobbyWidth !== width || this.lobbyHeight !== height) {
       this.lobbyWidth = width;
       this.lobbyHeight = height;
 
       this.gameSize = Math.min(width, height) - 5;
+      console.log('width', this.gameSize)
       if (this.gameSize > 600) {
         this.gameSize = 600;
       }
+
       this.cdr.detectChanges();
     }
 

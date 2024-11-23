@@ -18,7 +18,7 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('gameCanvas') gameCanvas!: ElementRef;
 
   @Input() room: any;
-  @Input() size: number = 500;
+  @Input() size: number = 600;
   @Input() playerList: any[] = []
   @Input() isModalOpen: boolean = false;
   @Input() direction = '';

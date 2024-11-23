@@ -52,29 +52,6 @@ export class JoystickComponent {
     this.lastEmittedDirection = { w: false, s: false, a: false, d: false };
   }
 
-  // private updateDirection(angle: number) {
-  //   const tolerance = Math.PI / 8; // Increase tolerance to reduce jitteriness
-  //   const directions = [
-  //     { angle: 0, keys: { w: false, s: false, a: false, d: true } },
-  //     { angle: Math.PI / 4, keys: { w: false, s: true, a: false, d: true } },
-  //     { angle: Math.PI / 2, keys: { w: false, s: true, a: false, d: false } },
-  //     { angle: 3 * Math.PI / 4, keys: { w: false, s: true, a: true, d: false } },
-  //      { angle: Math.PI, keys: { w: false, s: false, a: true, d: false } },
-  //    { angle: -3 * Math.PI / 4, keys: { w: false, s: true, a: true, d: false } },
-  //      { angle: -Math.PI / 2, keys: { w: true, s: false, a: false, d: false } },
-  //     { angle: -Math.PI / 4, keys: { w: false, s: false, a: false, d: true } }
-  //   ];
-
-  //   for (const dir of directions) {
-  //     if (angle >= dir.angle - tolerance && angle < dir.angle + tolerance) {
-  //       if (Object.keys(dir.keys).some(key => this.lastEmittedDirection[key as keyof typeof dir.keys] !== dir.keys[key as keyof typeof dir.keys])) {
-  //       this.directionChange.emit(dir.keys);
-  //       this.lastEmittedDirection = dir.keys;
-  //       return;
-  //       }
-  //     }
-  //   }
-  // }
 
   private readonly TOLERANCE = Math.PI / 8; // Made constant
   private readonly DIRECTIONS = [ // Pre-defined directions array

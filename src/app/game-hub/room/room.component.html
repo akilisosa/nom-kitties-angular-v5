@@ -2,7 +2,7 @@
   
     <div style="width:100%; display:flex; flex-direction:row; justify-content: space-between; margin: 1rem;">
       <button mat-raised-button color="secondary" (click)="openChat()">Chat</button>
-      <button mat-raised-button color="accent">Lobby</button>
+      <button mat-raised-button  *ngIf="gameState == 'lobby'"  color="accent">Lobby</button>
       <button mat-raised-button color="warn" (click)="leaveRoom()">Leave Room</button>
     </div>
   
