@@ -167,6 +167,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
     setTimeout(() => {
       this.gameDataService.subscribe('/default/messages');
+      this.drawCanvas();
     }, 1000);
 
   }
@@ -325,9 +326,11 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
     // Remove collected circles and spawn new ones if needed
     this.collectibles = this.collectibles.filter(c => c.active);
-    while (this.collectibles.length < this.treatsOnFloor) {
+    if (this.collectibles.length < this.treatsOnFloor) {
+      while (this.collectibles.length < this.treatsOnFloor) {
       spawnCollectible(this.COLLECTIBLE_RADIUS, this.obstacles, this.size, this.collectibles, this.treatsOnFloor);
-      this.newCollectibles(this.collectibles)
+      }
+       this.newCollectibles(this.collectibles)
     }
 
 

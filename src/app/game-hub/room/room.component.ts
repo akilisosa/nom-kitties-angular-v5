@@ -178,6 +178,7 @@ private readonly CHECK_INTERVAL = 100; // milliseconds
   }
 
   playGame(){
+    console.log('playGame');
     this.gameState = 'playing';
   }
 
