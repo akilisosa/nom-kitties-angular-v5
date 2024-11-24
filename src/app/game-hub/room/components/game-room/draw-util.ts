@@ -2,14 +2,11 @@ export const getScaledValue = (value: number, size: number) => {
 
   const scaleFactor = size / 600;
   return Math.round(value * scaleFactor);
-
-  
 }
 
 export  const generateRandomPosition = (collectibleRadius: number, obstacleList: any[], size: number): { x: number, y: number } => {
   let position: any;
   let validPosition = false;
-
 
   while (!validPosition) {
     position = {
@@ -44,13 +41,6 @@ export const   spawnCollectible = (radius: number, obstacleList: any[],
 }
 
 export const drawKitty = (ctx: any, x: number, y: number, width: number, color: string = '#040607') => {
-
-  // if(resize){
-  //   width = getScaledValue(50, size);
-  //   // x = getScaledValue(x, size);
-  //   // y = getScaledValue(y, size);
-  // }
-
 
   const scale = width / 50; // SVG viewBox is 50x50w
 

@@ -105,6 +105,7 @@ export class GameDataService {
     };
 
     this.sendStartMessage(subscriptionMessage);
+    return subscriptionMessage.id;
   }
 
   unsubscribe(subscriptionId: string) {

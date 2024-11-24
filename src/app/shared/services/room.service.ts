@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { generateClient } from 'aws-amplify/api';
 import { BehaviorSubject } from 'rxjs';
-import { Schema } from '../../../../amplify/data/resource';
-// import type { Schema } from '@/amplify/data/resource' 
+import type { Schema } from '../../../../amplify/data/resource';
 
 @Injectable({
   providedIn: 'root'
@@ -104,13 +103,15 @@ async getRoomList() {
 }
 
 async startGame(id: string, gameStartTime: string) {
-  const client: any = generateClient({ authMode: 'userPool' })
+  console.log('startGame', id, gameStartTime)
+  const client = generateClient<Schema>({ authMode: 'userPool' })
   let res;
   try {
     res = (await client.models.Room.update({
       id,
-      status: 'PLAYING'
-    })).data;
+      status: 'STARTING',
+      gameStartTime
+    } as any)).data;
     this.room.next(res);
   } catch (error) {
     console.error(error);
@@ -118,6 +119,25 @@ async startGame(id: string, gameStartTime: string) {
 
   return res;
 }
+
+async playGame(id: any, currentPlayers: string[]) {
+  console.log('startGame', id)
+  const client = generateClient<Schema>({ authMode: 'userPool' })
+  let res;
+  try {
+    res = (await client.models.Room.update({
+      id,
+      currentPlayers,
+      status: 'PLAYING',
+    } as any)).data;
+    this.room.next(res);
+  } catch (error) {
+    console.error(error);
+  }
+
+  return res;
+}
+
 
 async updateRoomWithPlayer(id: string, players: any[]) {
   const client: any = generateClient({ authMode: 'userPool' })

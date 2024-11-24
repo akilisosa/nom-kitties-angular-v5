@@ -33,13 +33,14 @@ import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angu
 })
  export class CountdownComponent  implements OnInit, OnDestroy {
   @Input() room: any; // Assuming room is passed as an input
-  @Output() startGameEvent = new EventEmitter<void>();
+  @Output() startGameEmit = new EventEmitter<void>();
   private intervalId: number | null = null;
   countdown: number = 5000; // Start with 5 seconds in milliseconds
   gameStartTime: number = 0;
 
   ngOnInit(): void {
     const timeElapsed = this.calculateTimeElapsed();
+    console.log(timeElapsed);
     this.gameStartTime = Date.now() + (5000 - timeElapsed); // Set game start time 5 seconds from now
     this.startCountdown(this.gameStartTime);
     // this.gameStartTime = Date.now() + (5000); // Set game start time 5 seconds from now
@@ -70,82 +71,11 @@ import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angu
       const timeLeft = gameStartTime - Date.now();
       this.countdown = Math.max(0, timeLeft);
 
-      if (this.countdown === 0 && this.intervalId) {
-        this.startGameEvent.emit(); 
+      if (this.countdown <= 0 && this.intervalId) {
+        this.startGameEmit.emit(); 
         clearInterval(this.intervalId);
         this.intervalId = null;
       }
     }, 100); // Update every 100 milliseconds for smoother countdown
   }
 }
-
-//implements OnInit, OnDestroy {
-//   @Input() room: any;
-//   @Output() startGameEvent = new EventEmitter<void>();
-
-//   private intervalId: number | null = null;
-//   countdown: number = 5000; // Start with 5 seconds in milliseconds
-//   gameStartTime: number = 0;
-
-//   ngOnInit(): void {
-//     const timeElapsed = this.calculateTimeElapsed();
-//     this.gameStartTime = Date.now() + (5000 - timeElapsed); // Set game start time 5 seconds from now
-//     this.startCountdown();
-//   }
-
-//   ngOnDestroy(): void {
-//     if (this.intervalId) {
-//       clearInterval(this.intervalId);
-//       this.intervalId = null;
-//     }
-//   }
-
-//   private calculateTimeElapsed(): number {
-//     if (!this.room?.updatedAt) {
-//       return 0;
-//     }
-
-//     const updatedAtMs = this.room.updatedAt instanceof Date 
-//       ? this.room.updatedAt.getTime()
-//       : new Date(this.room.updatedAt).getTime();
-
-//     return Math.min(5000, Date.now() - updatedAtMs);
-//   }
-
-//   private startCountdown(): void {
-//     // Clear any existing interval
-//     if (this.intervalId) {
-//       clearInterval(this.intervalId);
-//       this.intervalId = null;
-//     }
-
-//     const calculateTimeLeft = (): number => {
-//       return Math.max(0, this.gameStartTime - Date.now());
-//     };
-
-//     // Initial time calculation
-//     const initialTimeLeft = calculateTimeLeft();
-    
-//     if (initialTimeLeft <= 0) {
-//       this.startGameEvent.emit();
-//       return;
-//     }
-
-//     // Set initial countdown
-//     this.countdown = Math.ceil(initialTimeLeft / 1000) * 1000; // Round up to nearest second
-
-//     // Set up the interval to update every second
-//     this.intervalId = window.setInterval(() => {
-//       const timeLeft = calculateTimeLeft();
-//       this.countdown = Math.ceil(timeLeft / 1000) * 1000; // Round up to nearest second
-
-//       if (timeLeft <= 0) {
-//         if (this.intervalId) {
-//           clearInterval(this.intervalId);
-//           this.intervalId = null;
-//         }
-//         this.startGameEvent.emit();
-//       }
-//     }, 1000);
-//   }
-// }

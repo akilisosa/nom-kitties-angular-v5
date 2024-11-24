@@ -26,6 +26,7 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
   @Input() treatsOnFloor = 5;
 
   @Output() startGameEmit = new EventEmitter<any>();
+  subscriptionID: any;
 
 
   players = new Map();
@@ -62,7 +63,7 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
 
   subscription = new Subscription()
 
-
+  passedInit = false;
 
 
   @HostListener('window:keydown', ['$event'])
@@ -130,7 +131,8 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
 
     const messages = this.gameDataService.connect();
 
-    this.subscription = messages.subscribe({
+    this.subscription.add( 
+      messages.subscribe({
       next: (message) => {
         console.log('Received message:', message);
         message = JSON.parse(message.event)
@@ -147,12 +149,9 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
       error: (error) => {
         console.error('Error:', error);
       }
-    });
+    }));
 
-    setTimeout(() => {
-      this.gameDataService.subscribe(`/default/messages/${this.room.id}`);
-    }, 1000);
-
+    this.passedInit = true;
   }
 
   async setOwner() {
@@ -168,6 +167,13 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
       this.player.size = getScaledValue(50, this.size);
       this.player.speed = getScaledValue(5, this.size);
     }
+
+    if(this.room?.id && this.passedInit){
+         setTimeout(() => {
+     this.subscriptionID = this.gameDataService.subscribe(`/default/messages/${this.room.id}`);
+    }, 1000);
+    this.passedInit = false
+    }
     if (this.isModalOpen) {
       this.stopGameLoop();
     }
@@ -179,6 +185,7 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
       cancelAnimationFrame(this.animationFrameId);
     }
     this.subscription.unsubscribe();
+    this.gameDataService.unsubscribe(this.subscriptionID);
   }
 
   stopGameLoop() {

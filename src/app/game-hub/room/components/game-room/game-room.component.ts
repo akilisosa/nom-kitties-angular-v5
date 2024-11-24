@@ -1,5 +1,4 @@
 import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ControllerComponent } from '../controller/controller.component';
 import { drawKitty, generateRandomPosition, getScaledValue, spawnCollectible } from './draw-util';
 import { GameDataService } from '../../services/game-data.service';
 // import { GameEventsService } from '../../services/game-events.service';
@@ -29,6 +28,11 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   @Input() treatsOnFloor = 5;
   COLLECTIBLE_RADIUS = 10;
   collectibles: any[] = [];
+  messages: any;
+
+  subscriptionID: any;
+
+  playing = false;
 
 
   players = new Map();
@@ -78,8 +82,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
       // check if this.keys values have changed
       if (Object.keys(this.keys).some(key => prevKeys[key as keyof typeof this.keys] !== this.keys[key as keyof typeof this.keys])) {
-        if (!this.owner) return;
-        this.gameDataService.publishEvent('/default/messages', {
+        if (!this.owner || !this.playing) return;
+        this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
           type: 'PLAYER_MOVE',
           player: { ...this.player, id: this.owner },
           keys: this.keys,
@@ -96,10 +100,10 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
       event.preventDefault();
       const prevKeys = { ...this.keys };
       this.keys[event.key as keyof typeof this.keys] = false;
-      if (!this.owner) return;
+      if (!this.owner || !this.playing) return;
       // check if this.keys values have changed
       if (Object.keys(this.keys).some(key => prevKeys[key as keyof typeof this.keys] !== this.keys[key as keyof typeof this.keys])) {
-        this.gameDataService.publishEvent('/default/messages', {
+        this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
           type: 'PLAYER_MOVE',
           player: { ...this.player, id: this.owner },
           keys: this.keys,
@@ -117,7 +121,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     console.log('direction', keys);
     this.keys = keys;
 
-    this.gameDataService.publishEvent('/default/messages', {
+
+    this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
       type: 'PLAYER_MOVE',
       player: { ...this.player, id: this.owner },
       keys: keys,
@@ -132,54 +137,70 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     this.setOwner()
     console.log('game room init');
 
-    const messages = this.gameDataService.connect();
+    this.messages = this.gameDataService.connect()
 
-    this.subscription = messages.subscribe({
-      next: (message) => {
+
+    this.messages.subscribe({
+      next: (message: any) => {
         console.log('Received message:', message);
-        message = JSON.parse(message.event)
-        if (message.player?.id === this.owner) return;
-        if (message.type === 'PLAYER_MOVE') {
-          this.players.set(message.player.id, { player: { ...message.player, resize: true }, keys: message.keys, screenSize: message.screenSize });
-        }
-        if (message.type === 'COLLECTIBLES') {
-          // resize
-          //if (message.player?.id === this.owner) return;
-         // this.collectibles = message.collectibles.map((collectible: any) => ({ ...collectible, x:((collectible.x/ this.size)*collectible.size), y:((collectible.y/this.size)*collectible.size) }));
-         console.log('COLLECTIBLES',message)
-          // resize collectibles
-          message.event.collectibles.forEach((collectible: any) => {
-            collectible.x = ((collectible.x / message.event.size) * this.size);
-            collectible.y = ((collectible.y / message.event.size) * this.size);
-          });
-         
-          this.collectibles = message.event.collectibles;
-
-        }
-        if (message.type === 'PLAYER_SCORE') {
-    this.playerScore(message)
-        }
+        this.handleMessage(message);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error:', error);
       }
-    });
-
+    })
+        
     setTimeout(() => {
-      this.gameDataService.subscribe('/default/messages');
+      this.subscriptionID = this.gameDataService.subscribe(`/default/messages/${this.room.id}`)
+      
+        
       this.drawCanvas();
     }, 1000);
 
   }
 
-  async setOwner() {
-    this.owner = (await this.authService.getCurrentUser()).userId;
-    const kitty = (await this.userService.getUser());
-    this.player = { ...this.player, color: kitty?.color || '#000000', id: this.owner };
+  private handleMessage(message: any) {
+    if (message.type === 'PLAYER_SCORE') {
+      this.playerScore(message);
+    }
+    if (message.player?.id === this.owner) return;
+    if (message.type === 'PLAYER_MOVE') {
+      message.player.x = getScaledValue(message.player.x, this.size);
+      message.player.y = getScaledValue(message.player.y, this.size);
+      this.players.set(message.player.id, { player: { ...message.player }, keys: message.keys, screenSize: message.screenSize });
+    }
+    if (message.type === 'COLLECTIBLES') {
+
+      message.event.collectibles.forEach((collectible: any) => {
+        collectible.x = ((collectible.x / message.event.size) * this.size);
+        collectible.y = ((collectible.y / message.event.size) * this.size);
+      });
+      this.collectibles = message.event.collectibles;
+    }
   }
 
-  playerScore(message: any){
-    console.log('PlayerScore',message)
+
+  async setOwner() {
+    this.owner = (await this.authService.getCurrentUser()).userId;
+    if (this.room.currentPlayers.includes(this.owner)) {
+      const kitty = await this.userService.getUser();
+      this.player = { ...this.player, color: kitty?.color || '#000000', id: this.owner };
+      this.playing = true;
+      console.log('kitty', kitty)
+    } else {
+      this.playing = false;
+    }
+  }
+
+  playerScore(message: any) {
+    console.log('PlayerScore', message)
+
+    const player = this.players.get(message.player.id);
+    if (player) {
+      player.player.score = message.player.score;
+    } else {
+      this.players.set(message.player.id, { player: { ...message.player }, keys: message.keys, screenSize: message.screenSize });
+    }
   }
 
   ngOnChanges() {
@@ -203,6 +224,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.subscription.unsubscribe();
+    this.gameDataService.unsubscribe(this.subscriptionID);
   }
 
   stopGameLoop() {
@@ -223,7 +245,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.canvas = this.gameCanvas?.nativeElement;
-    if(!this.canvas) return;
+    if (!this.canvas) return;
     this.ctx = this.canvas.getContext('2d');
     this.ctx.fillStyle = '#ebebd3';
     this.ctx.fillRect(0, 0, this.size, this.size);
@@ -232,7 +254,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
 
   consumeCollectible(player: any, width: number, collectibles: any[]) {
-    this.gameDataService.publishEvent('/default/messages', {
+    this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
       type: 'PLAYER_SCORE',
       player: { ...this.player, id: this.owner, },
       keys: this.keys,
@@ -241,8 +263,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     })
 
     this.collectibles = collectibles;
-    
-    
+
+
 
   }
 
@@ -256,7 +278,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
         const distance = Math.sqrt(dx * dx + dy * dy);
         if (distance < (width / 2 + collectible.radius)) {
           collectible.active = false;
-          this.consumeCollectible(player, width, collectibleList) 
+          this.consumeCollectible(player, width, collectibleList)
         }
       }
 
@@ -294,9 +316,10 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   newCollectibles(collectibles: any[]) {
-    this.gameDataService.publishEvent('/default/messages', {
+    console.log('newCollectibles', collectibles)
+    this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
       type: 'COLLECTIBLES',
-      event: {collectibles, size: this.size},
+      event: { collectibles, size: this.size },
     })
   }
 
@@ -328,24 +351,20 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     this.collectibles = this.collectibles.filter(c => c.active);
     if (this.collectibles.length < this.treatsOnFloor) {
       while (this.collectibles.length < this.treatsOnFloor) {
-      spawnCollectible(this.COLLECTIBLE_RADIUS, this.obstacles, this.size, this.collectibles, this.treatsOnFloor);
+        spawnCollectible(this.COLLECTIBLE_RADIUS, this.obstacles, this.size, this.collectibles, this.treatsOnFloor);
       }
-       this.newCollectibles(this.collectibles)
+      this.newCollectibles(this.collectibles)
     }
 
 
-
-    drawKitty(this.ctx, this.player.x, this.player.y, this.player.size,this.player.color);
-
+    if (this.playing) {
+      drawKitty(this.ctx, this.player.x, this.player.y, this.player.size, this.player.color);
+    }
     [...this.players.values()].forEach((playerData: any) => {
 
       if (!playerData.player) return;
 
       const { player, keys, screenSize } = playerData;
-      if (player.resize == true) {
-        player.x = getScaledValue(player.x, this.size);
-        player.y = getScaledValue(player.y, this.size);
-      }
 
 
       // Update position if keys are pressed
@@ -355,12 +374,12 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
       player.x = Math.max(0, Math.min(newX, this.size - this.player.size));
       player.y = Math.max(0, Math.min(newY, this.size - this.player.size));
 
-     // this.player.color;
+      // this.player.color;
 
 
       drawKitty(this.ctx, player.x, player.y, this.player.size, player.color);
 
-      this.players.set(player.id, { player: { ...player, resize: false }, keys, screenSize });
+      this.players.set(player.id, { player: { ...player }, keys, screenSize });
 
     });
 
@@ -369,9 +388,9 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     this.collectibles.forEach(collectible => {
       if (collectible.active) {
         this.ctx.beginPath();
-        this.ctx.arc(collectible.x, collectible.y, this.COLLECTIBLE_RADIUS, 0,pi2);
+        this.ctx.arc(collectible.x, collectible.y, this.COLLECTIBLE_RADIUS, 0, pi2);
         // this.ctx.arc(collectible.x * this.size / collectible.size, collectible.x * this.size / collectible.size, collectible.radius, 0, Math.PI * 2);
-      //  console.log(collectible.x, collectible.x * this.size / collectible)
+        //  console.log(collectible.x, collectible.x * this.size / collectible)
         this.ctx.fillStyle = collectible.color;
         this.ctx.fill();
         this.ctx.closePath();

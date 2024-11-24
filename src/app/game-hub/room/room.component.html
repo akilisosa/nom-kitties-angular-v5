@@ -3,14 +3,19 @@
     <div style="width:100%; display:flex; flex-direction:row; justify-content: space-between; margin: 1rem;">
       <button mat-raised-button color="secondary" (click)="openChat()">Chat</button>
       <button mat-raised-button  *ngIf="gameState == 'lobby'"  color="accent">Lobby</button>
+     
+      <button mat-raised-button *ngIf="gameState == 'playing'" color="accent">{{timeRemaining.value}}</button>
       <button mat-raised-button color="warn" (click)="leaveRoom()">Leave Room</button>
     </div>
   
     <div id="lobbyContainer" #lobbyContainer style="width: 100%; height: 80vh;">
-       <app-lobby (startGameEmit)="startGame()" *ngIf="gameState == 'lobby'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-lobby>
+
+     
+      <app-lobby (startGameEmit)="startGame()" *ngIf="gameState == 'lobby'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-lobby>
       <!-- <app-controller [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-controller> -->
       <app-countdown (startGameEmit)="playGame()" *ngIf="gameState == 'countdown'" [room]="room"></app-countdown>
       <app-game-room *ngIf="gameState =='playing'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-game-room>
+
     </div>
   </div>
   
