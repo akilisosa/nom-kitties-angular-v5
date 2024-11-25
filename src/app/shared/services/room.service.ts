@@ -143,6 +143,25 @@ async playGame(id: any, currentPlayers: string[]) {
   return res;
 }
 
+async joinRoom(id: any, players: string[]): Promise< any> {
+  const client: any = generateClient({ authMode: 'userPool' })
+  let res;
+  try {
+    res = (await client.models.Room .update({
+      id,
+      players
+    })).data;
+
+    console.log('joinroom', res.data)
+    this.room.next(res.data)
+  } catch (error) {
+    console.error(error);
+  }
+
+  return res;
+}
+
+
 
 async updateRoomWithPlayer(id: string, players: any[]) {
   const client: any = generateClient({ authMode: 'userPool' })
@@ -152,15 +171,7 @@ async updateRoomWithPlayer(id: string, players: any[]) {
       id,
       players
     })).data;
-    // res = await client.graphql({
-    //   query: updateRoom,
-    //   variables: {
-    //     input: {
-    //       id: roomID,
-    //       players,
-    //     }
-    //   }
-    // })
+
     console.log('joinroom', res.data)
     this.room.next(res.data)
   } catch (error) {

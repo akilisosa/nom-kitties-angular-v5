@@ -52,19 +52,19 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   gameState = 'lobby';
 
   private lastCheck = 0;
-private readonly CHECK_INTERVAL = 100; // milliseconds
+  private readonly CHECK_INTERVAL = 100; // milliseconds
 
-// Add these properties to your component class
-private countdownInterval: any;
-timeRemaining = new BehaviorSubject<number>(30);
+  // Add these properties to your component class
+  private countdownInterval: any;
+  timeRemaining = new BehaviorSubject<number>(30);
 
-// Handle what happens when time is up
-private handleTimeUp() {
-  // Emit an event or handle game end logic
-  console.log('Time is up!');
-  // You might want to emit an event
- 
-}
+  // Handle what happens when time is up
+  private handleTimeUp() {
+    // Emit an event or handle game end logic
+    console.log('Time is up!');
+    // You might want to emit an event
+
+  }
 
 
 
@@ -75,21 +75,15 @@ private handleTimeUp() {
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private userService: UserService,
-    private authService: AuthService) { 
-      this.roomCode = this.route.snapshot.paramMap.get('id')!;
-    }
+    private authService: AuthService) {
+    this.roomCode = this.route.snapshot.paramMap.get('id')!;
+  }
 
   ngOnInit() {
     this.getRoom();
-    // this.subscribeToRoom();
-    this.getCurrentUser();
     this.mobile = this.isMobileDevice()
   }
 
-  private isMobileDevice(): any {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
-  }
 
   ngAfterViewChecked() {
 
@@ -104,7 +98,7 @@ private handleTimeUp() {
     if (this.lobbyWidth !== width || this.lobbyHeight !== height) {
       this.lobbyWidth = Math.min(width, 600);
       this.lobbyHeight = Math.min(height, 600);
-      this.gameSize = Math.min(this.lobbyWidth,  this.lobbyHeight) - 5;
+      this.gameSize = Math.min(this.lobbyWidth, this.lobbyHeight) - 5;
       if (this.gameSize > 600) {
         this.gameSize = 600;
       }
@@ -117,9 +111,6 @@ private handleTimeUp() {
     this.subscription.unsubscribe();
   }
 
-  async getCurrentUser() {
-    const kitty = await this.userService.getUser();
-  }
 
   async cancel() {
     this.isModalOpen = false;
@@ -151,16 +142,21 @@ private handleTimeUp() {
     let lastSegment = urlSegments[urlSegments.length - 1];
     const curr = await this.authService.getCurrentUser();
     this.room = await this.roomService.getRoomByCode(lastSegment);
-    console.log('room', this.room);
-    
-    
+    console.log('currernt user', this.room);
     if (!this.room) {
-      
       this.roomDoesntExist();
+      return;
     }
-    else {
+
+    let players = this.room.players || [];
+    console.log('players', players);
+    if(!players.includes(curr.userId)){
+       players = [...players, curr.userId];
+      this.room = (await this.roomService.joinRoom(this.room.id, players));
+    }
+  
       // if playing or countdown return
-       this.subscription.add(this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
+      this.subscription.add(this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
         this.room = { ...room };
         console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
 
@@ -168,13 +164,13 @@ private handleTimeUp() {
           this.gameState = 'countdown';
         }
 
-        if(room.status === 'PLAYING') {
+        if (room.status === 'PLAYING') {
           this.gameState = 'playing';
           this.startGameCountdown();
         }
       }));
 
-    }
+    
   }
 
   startGameCountdown() {
@@ -182,24 +178,24 @@ private handleTimeUp() {
       console.error('No time limit set');
       return;
     }
-  
+
     // Convert timeLimit to milliseconds (assuming timeLimit is in seconds)
     const timeLimitMs = this.room.timeLimit * 1000;
     const endTime = Date.now() + timeLimitMs;
-  
+
     // Clear any existing interval
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
     }
-  
+
     // Create a Subject to handle the countdown
     this.timeRemaining = new BehaviorSubject<number>(this.room.timeLimit);
-  
+
     // Update every second
     this.countdownInterval = setInterval(() => {
       const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
       this.timeRemaining.next(remaining);
-  
+
       // When countdown reaches 0
       if (remaining === 0) {
         clearInterval(this.countdownInterval);
@@ -212,7 +208,7 @@ private handleTimeUp() {
   subscribeToRoom() {
     this.subscription.add(this.roomService.room.subscribe(async (room) => {
       if (room) {
-        this.room = {...room};
+        this.room = { ...room };
         const curr = await this.authService.getCurrentUser();
         if (this.room.owner !== curr.userId) {
           await this.joinGame(this.room.id, curr);
@@ -226,7 +222,7 @@ private handleTimeUp() {
   }
 
   async startGame() { // 5 seconds in the future
-    const gameStartTime =   new Date(Date.now() + 5000).toISOString();
+    const gameStartTime = new Date(Date.now() + 5000).toISOString();
     console.log('room', this.room, this.room.updatedAt, this.room.updatedAt);
 
     await this.roomService.startGame(this.room.id, gameStartTime);
@@ -234,27 +230,27 @@ private handleTimeUp() {
     // this.gameState = 'playing';
   }
 
-   selectPlayersForRound(): string[] {
-    if (!this.room?.players || !this.room?.playersPerRound) {
+  selectPlayersForRound(): string[] {
+    if (!this.room?.players) {
       return [];
     }
-  
+
     // Create a copy of players array to avoid modifying original
     const availablePlayers = [...this.room.players];
     const numPlayersNeeded = Math.min(this.room.playersPerRound, availablePlayers.length);
     const selectedPlayers: string[] = [];
-  
+
     // Randomly select players
     for (let i = 0; i < numPlayersNeeded; i++) {
       const randomIndex = Math.floor(Math.random() * availablePlayers.length);
       const selectedPlayer = availablePlayers.splice(randomIndex, 1)[0];
       selectedPlayers.push(selectedPlayer);
     }
-  
+
     return selectedPlayers;
   }
 
-  playGame(){
+  playGame() {
     const currentPlayers = this.selectPlayersForRound();
     this.roomService.playGame(this.room.id, currentPlayers);
   }
@@ -290,5 +286,12 @@ private handleTimeUp() {
 
     await this.router.navigate(['/game-hub']);
   }
+
+  // util
+  private isMobileDevice(): any {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+  }
+
 
 }

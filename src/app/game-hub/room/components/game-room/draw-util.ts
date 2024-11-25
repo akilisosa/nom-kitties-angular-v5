@@ -34,7 +34,7 @@ export const   spawnCollectible = (radius: number, obstacleList: any[],
       x: position.x,
       y: position.y,
       radius,
-      color: 'yellow',
+      color: '#FF4E00',
       active: true
     });
   }

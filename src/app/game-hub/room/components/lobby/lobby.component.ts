@@ -6,10 +6,11 @@ import { UserService } from '../../../../shared/services/user.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { JoystickComponent } from '../joystick/joystick.component';
 
 @Component({
   selector: 'app-lobby',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule, JoystickComponent],
   standalone: true,
   templateUrl: './lobby.component.html',
   styleUrl: './lobby.component.css'
@@ -112,7 +113,6 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onDirectionChange(keys: any) {
-    console.log('direction', keys);
     this.keys = keys;
 
     this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
@@ -127,23 +127,18 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit() {
 
     this.setOwner()
-    console.log('game room init');
 
     const messages = this.gameDataService.connect();
-
     this.subscription.add( 
       messages.subscribe({
       next: (message) => {
         console.log('Received message:', message);
         message = JSON.parse(message.event)
+        
         if (message.player?.id === this.owner) return;
+        console.log('PLAYER_MOVE', message.player?.id, this.owner)
         if (message.type === 'PLAYER_MOVE') {
-
- 
-            message.player.x = getScaledValue(message.player.x, this.size);
-            message.player.y = getScaledValue(message.player.y, this.size);
-          
-          this.players.set(message.player.id, { player: { ...message.player}, keys: message.keys, screenSize: message.screenSize });
+            this.players.set(message.player.id, { player: { ...message.player}, keys: message.keys, screenSize: message.screenSize });
         }
       },
       error: (error) => {
@@ -257,7 +252,6 @@ export class LobbyComponent implements OnInit, OnChanges, OnDestroy {
     this.player.y = Math.max(0, Math.min(newP1Y, this.size - this.player.size));
     // Check i
 
-    // iterate over players
 
     this.ctx.clearRect(0, 0, this.size, this.size);
     this.ctx.fillStyle = '#ebebd3';
