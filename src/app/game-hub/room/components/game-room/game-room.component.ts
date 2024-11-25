@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { drawKitty, generateRandomPosition, getScaledValue, spawnCollectible } from './draw-util';
 import { GameDataService } from '../../services/game-data.service';
 // import { GameEventsService } from '../../services/game-events.service';
@@ -30,6 +30,8 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
   collectibles: any[] = [];
   messages: any;
 
+  @Output() playerScoreEmit = new EventEmitter<any>()
+
   subscriptionID: any;
 
   playing = false;
@@ -45,6 +47,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
     size: 50,
     speed: 5,
     color: '#000000',
+    score: 0
   }
 
   keys = {
@@ -197,7 +200,7 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
     const player = this.players.get(message.player.id);
     if (player) {
-      player.player.score = message.player.score;
+      player.player.score = message.player.score + 1;
     } else {
       this.players.set(message.player.id, { player: { ...message.player }, keys: message.keys, screenSize: message.screenSize });
     }

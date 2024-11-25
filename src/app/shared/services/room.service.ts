@@ -3,6 +3,8 @@ import { generateClient } from 'aws-amplify/api';
 import { BehaviorSubject } from 'rxjs';
 import type { Schema } from '../../../../amplify/data/resource';
 
+
+type Room = Schema['Room']['type'];
 @Injectable({
   providedIn: 'root'
 })
@@ -33,9 +35,12 @@ subscribeToRoomByID(id: any) {
 }
 
 async getRoomByCode(code: string) {
-  const client = generateClient<Schema>({ authMode: 'apiKey' })
+  const client: any = generateClient<Schema>({ authMode: 'apiKey' })
   let res;
   try {
+
+     //res = (await client.models.Room.listRoomsBySimpleCode({ simpleCode:code })).data;
+    // console.log('getRoomByCode', res);
     res = (await client.models.Room.list({
       filter: {
         simpleCode: {

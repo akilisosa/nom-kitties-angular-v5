@@ -35,23 +35,23 @@ const schema = a.schema({
     ]),
 
       // message 
-  Message: a.
-  model({
-    content: a.string().required(),
-    roomID: a.string().required(),
-    createdAt: a.datetime().required(),
-    color: a.string().required(),
-    name: a.string().required(),
-  })
-  .secondaryIndexes((index: any) => [
-    index('roomID').sortKeys(['createdAt']),
-  ])
-  .authorization((allow: any) => [
-    // Owner can do all operations
-    allow.owner(),
-    // Public can read
-    allow.publicApiKey() //.to(['create', 'read']),
-  ]),
+  // Message: a.
+  // model({
+  //   content: a.string().required(),
+  //   roomID: a.string().required(),
+  //   createdAt: a.datetime().required(),
+  //   color: a.string().required(),
+  //   name: a.string().required(),
+  // })
+  // .secondaryIndexes((index: any) => [
+  //   index('roomID').sortKeys(['createdAt']),
+  // ])
+  // .authorization((allow: any) => [
+  //   // Owner can do all operations
+  //   allow.owner(),
+  //   // Public can read
+  //   allow.publicApiKey() //.to(['create', 'read']),
+  // ]),
 
    // ROOM
    Room: a
@@ -72,8 +72,8 @@ const schema = a.schema({
 
      currentPlayers: a.string().array().authorization(
        (allow: any) => [allow.owner(),
-       allow.authenticated().to(['read',]),
-       allow.publicApiKey().to(['read',])],
+       allow.authenticated().to(['read']),
+       allow.publicApiKey().to(['read'])],
      ),
 
      gameStartTime: a.datetime(),

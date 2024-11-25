@@ -20,19 +20,19 @@ export class ChatService {
   async sendChat(roomID: string, message: string, color: string, sender: string) {  
     const client = generateClient<Schema>({authMode: 'userPool'});
     let res;
-    try {
-      res = await client.models.Message.create({
-        roomID,
-        content: message,
-        color,
-        name: sender,
-        createdAt: new Date().toISOString(),
+    // try {
+    //   res = await client.models.Message.create({
+    //     roomID,
+    //     content: message,
+    //     color,
+    //     name: sender,
+    //     createdAt: new Date().toISOString(),
    
-      });
+    //   });
 
-    } catch (error) {
-      console.error(error);
-    }
+    // } catch (error) {
+    //   console.error(error);
+    // }
   }
 
  async getLastMessages(id: string) {
