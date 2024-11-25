@@ -44,8 +44,8 @@ async getRoomByCode(code: string) {
   let res;
   try {
 
-     //res = (await client.models.Room.listRoomsBySimpleCode({ simpleCode:code })).data;
-    // console.log('getRoomByCode', res);
+     res = (await client.models.Room.listRoomsBySimpleCode({ simpleCode:code })).data;
+    console.log('getRoomByCode', res);
     res = (await client.models.Room.list({
       filter: {
         simpleCode: {
