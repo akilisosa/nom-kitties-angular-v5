@@ -34,6 +34,11 @@ subscribeToRoomByID(id: any) {
  
 }
 
+ subscribeToRoomByCode(code: string) {
+  const client = generateClient<Schema>({ authMode: 'apiKey' })
+ return client.models.Room.observeQuery({ filter: { simpleCode: { eq: code } } })
+}
+
 async getRoomByCode(code: string) {
   const client: any = generateClient<Schema>({ authMode: 'apiKey' })
   let res;
@@ -164,7 +169,7 @@ async joinRoom(id: any, players: string[]): Promise< any> {
 
 
 async updateRoomWithPlayer(id: string, players: any[]) {
-  const client: any = generateClient({ authMode: 'userPool' })
+  const client: any = generateClient({ authMode: 'apiKey' })
   let res;
   try {
     res = (await client.models.Room.update({

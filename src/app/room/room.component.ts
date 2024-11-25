@@ -5,11 +5,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { AuthService } from '../../shared/services/auth.service';
-import { RoomService } from '../../shared/services/room.service';
-import { ChatRoomComponent } from '../../shared/components/chat-room/chat-room.component';
+import { AuthService } from '../shared/services/auth.service';
+import { RoomService } from '../shared/services/room.service';
+import { ChatRoomComponent } from '../shared/components/chat-room/chat-room.component';
 import { GameRoomComponent } from './components/game-room/game-room.component';
-import { UserService } from '../../shared/services/user.service';
+import { UserService } from '../shared/services/user.service';
 import { LobbyComponent } from './components/lobby/lobby.component';
 import { CountdownComponent } from './components/countdown/countdown.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -81,6 +81,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   ngOnInit() {
     this.getRoom();
+    console.log('room is working', this.room);
     this.mobile = this.isMobileDevice()
   }
 
@@ -140,7 +141,26 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   async getRoom() {
     const urlSegments = this.router.url.split('/');
     let lastSegment = urlSegments[urlSegments.length - 1];
-    const curr = await this.authService.getCurrentUser();
+    let curr = null;
+    try {
+     curr = await this.authService.getCurrentUser();
+    } catch (error) {
+      console.error('Error getting current user:', error);
+    }
+try {
+  console.log('subscribing to room')
+    this.roomService.subscribeToRoomByCode(lastSegment).subscribe((room) => {
+      console.log('room subscription', room);
+      // if (room) {
+      //   this.room = { ...room };
+      //   console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
+      // }
+    });
+  } catch (error) {
+    console.error('Error subscribing to room:', error);
+  }
+
+
     this.room = await this.roomService.getRoomByCode(lastSegment);
     console.log('currernt user', this.room);
     if (!this.room) {
@@ -150,8 +170,8 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     let players = this.room.players || [];
     console.log('players', players);
-    if(!players.includes(curr.userId)){
-       players = [...players, curr.userId];
+    if(!players.includes(curr?.userId)){
+       players = [...players, curr?.userId];
       this.room = (await this.roomService.joinRoom(this.room.id, players));
     }
   
@@ -206,7 +226,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   subscribeToRoom() {
-    this.subscription.add(this.roomService.room.subscribe(async (room) => {
+    this.subscription.add(this.roomService.room.subscribe(async (room: any) => {
       if (room) {
         this.room = { ...room };
         const curr = await this.authService.getCurrentUser();

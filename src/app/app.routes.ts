@@ -18,10 +18,30 @@ export const routes: Routes = [
             import('./auth/auth.component').then((m) => m.AuthComponent),
     },
     {
+        path: 'room/:id',
+        loadComponent: () =>
+            import('./room/room.component').then((m) => m.RoomComponent),
+    },
+    {
         path: 'local-game',
         loadComponent: () =>
             import('./local-game/local-game.component').then(
                 (m) => m.LocalGameComponent
+            ),
+    },
+    {
+        path: 'learn-more',
+        loadComponent: () =>
+            import('./learn-more/learn-more.component').then(
+                (m) => m.LearnMoreComponent
+            ),
+    },
+
+    {
+        path: 'shop',
+        loadComponent: () =>
+            import('./shop/shop.component').then(
+                (m) => m.ShopComponent
             ),
     },
     {
@@ -44,27 +64,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
     },
 
-    {
-        path: 'game-hub/room/:id',
-        loadComponent: () =>
-            import('./game-hub/room/room.component').then((m) => m.RoomComponent),
-        canActivate: [authGuard],
-    },
-    {
-        path: 'learn-more',
-        loadComponent: () =>
-            import('./learn-more/learn-more.component').then(
-                (m) => m.LearnMoreComponent
-            ),
-    },
-
-    {
-        path: 'shop',
-        loadComponent: () =>
-            import('./shop/shop.component').then(
-                (m) => m.ShopComponent
-            ),
-    },
+ 
 
 
 ];

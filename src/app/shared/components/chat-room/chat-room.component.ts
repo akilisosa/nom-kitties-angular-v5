@@ -8,7 +8,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { ChatService } from '../../services/chat.service';
-import { GameDataService } from '../../../game-hub/room/services/game-data.service';
+import { GameDataService } from '../../../room/services/game-data.service';
 import { DomSanitizer } from '@angular/platform-browser';
 
 
@@ -64,12 +64,12 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
 
     
     this.subscription = messages.subscribe({
-      next: (message) => {
+      next: (message: any) => {
         console.log('Received message:', message);
         message = JSON.parse(message.event)
         this.updateMessageList(message)
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error:', error);
       }
     });

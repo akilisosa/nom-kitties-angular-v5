@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { filter } from 'rxjs';
+import { signOut } from 'aws-amplify/auth';
 
 Amplify.configure(outputs);
 
@@ -66,6 +67,13 @@ export class AppComponent {
     } else {
       this.title = 'Nom Kitties'
     }
+  }
+
+  logout() {
+    localStorage.removeItem('auth_token');
+    signOut();
+    this.router.navigate(['/home']);
+  
   }
 
   toggleSidebar() {

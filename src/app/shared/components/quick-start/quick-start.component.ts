@@ -84,7 +84,7 @@ export class QuickStartComponent implements OnInit {
       this.view = 'join';
       return;
     }
-    this.router.navigate(['game-hub', 'room', code]);
+    this.router.navigate([ 'room', code]);
   
   }
 
@@ -108,7 +108,7 @@ export class QuickStartComponent implements OnInit {
     
     this.loading = false;
 
-    this.router.navigate(['game-hub', 'room', this.newGameForm.value.simpleCode]);
+    this.router.navigate([ 'room', this.newGameForm.value.simpleCode]);
 
     
   }
