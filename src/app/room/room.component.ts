@@ -13,6 +13,7 @@ import { UserService } from '../shared/services/user.service';
 import { LobbyComponent } from './components/lobby/lobby.component';
 import { CountdownComponent } from './components/countdown/countdown.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PodiumComponent } from "./components/podium/podium.component";
 @Component({
   standalone: true,
   imports: [
@@ -24,8 +25,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     LobbyComponent,
     GameRoomComponent,
     CountdownComponent,
-    MatProgressSpinnerModule
-  ],
+    MatProgressSpinnerModule,
+    PodiumComponent
+],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
@@ -51,6 +53,8 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   mobile = false;
   gameState = 'lobby';
 
+  playersScore = new Map();
+
   private lastCheck = 0;
   private readonly CHECK_INTERVAL = 100; // milliseconds
 
@@ -58,13 +62,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   private countdownInterval: any;
   timeRemaining = new BehaviorSubject<number>(30);
 
-  // Handle what happens when time is up
-  private handleTimeUp() {
-    // Emit an event or handle game end logic
-    console.log('Time is up!');
-    // You might want to emit an event
 
-  }
 
 
 
@@ -112,6 +110,41 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.subscription.unsubscribe();
   }
 
+  // Handle what happens when time is up
+  private handleTimeUp() {
+    // Emit an event or handle game end logic
+    this.gameState = 'podium';
+
+    // get players with highest score
+    let maxScore = 0;
+    let winners = [];
+
+    for(const [key, value] of this.playersScore.entries()) {
+      if (value > maxScore) {
+        maxScore = value;
+        winners = [key];
+      } else if (value === maxScore) {
+        winners.push(key);
+      }
+    }
+    // if(this.kitty = this.room.owner) {
+
+    this.roomService.updateRoomWithWinners(this.room.id, winners);
+
+    // }
+   
+    // You might want to emit an event
+
+  }
+
+  playerScored(event: any) {
+    const id = event.player.id;
+    console.log()
+    let playerScore = this.playersScore.get(id) || 0;
+    playerScore++;
+    this.playersScore.set(id, playerScore);
+  }
+
 
   async cancel() {
     this.isModalOpen = false;
@@ -143,22 +176,22 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     let lastSegment = urlSegments[urlSegments.length - 1];
     let curr = null;
     try {
-     curr = await this.authService.getCurrentUser();
+      curr = await this.authService.getCurrentUser();
     } catch (error) {
       console.error('Error getting current user:', error);
     }
-try {
-  console.log('subscribing to room')
-    this.roomService.subscribeToRoomByCode(lastSegment).subscribe((room) => {
-      console.log('room subscription', room);
-      // if (room) {
-      //   this.room = { ...room };
-      //   console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
-      // }
-    });
-  } catch (error) {
-    console.error('Error subscribing to room:', error);
-  }
+    try {
+      console.log('subscribing to room')
+      this.roomService.subscribeToRoomByCode(lastSegment).subscribe((room) => {
+        console.log('room subscription', room);
+        // if (room) {
+        //   this.room = { ...room };
+        //   console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
+        // }
+      });
+    } catch (error) {
+      console.error('Error subscribing to room:', error);
+    }
 
 
     this.room = await this.roomService.getRoomByCode(lastSegment);
@@ -170,27 +203,27 @@ try {
 
     let players = this.room.players || [];
     console.log('players', players);
-    if(!players.includes(curr?.userId)){
-       players = [...players, curr?.userId];
+    if (!players.includes(curr?.userId)) {
+      players = [...players, curr?.userId];
       this.room = (await this.roomService.joinRoom(this.room.id, players));
     }
-  
-      // if playing or countdown return
-      this.subscription.add(this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
-        this.room = { ...room };
-        console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
 
-        if (room.status === 'STARTING') {
-          this.gameState = 'countdown';
-        }
+    // if playing or countdown return
+    this.subscription.add(this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
+      this.room = { ...room };
+      console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
 
-        if (room.status === 'PLAYING') {
-          this.gameState = 'playing';
-          this.startGameCountdown();
-        }
-      }));
+      if (room.status === 'STARTING') {
+        this.gameState = 'countdown';
+      }
 
-    
+      if (room.status === 'PLAYING') {
+        this.gameState = 'playing';
+        this.startGameCountdown();
+      }
+    }));
+
+
   }
 
   startGameCountdown() {

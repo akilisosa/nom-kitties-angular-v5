@@ -34,24 +34,6 @@ const schema = a.schema({
       allow.publicApiKey().to(['read']),
     ]),
 
-      // message 
-  // Message: a.
-  // model({
-  //   content: a.string().required(),
-  //   roomID: a.string().required(),
-  //   createdAt: a.datetime().required(),
-  //   color: a.string().required(),
-  //   name: a.string().required(),
-  // })
-  // .secondaryIndexes((index: any) => [
-  //   index('roomID').sortKeys(['createdAt']),
-  // ])
-  // .authorization((allow: any) => [
-  //   // Owner can do all operations
-  //   allow.owner(),
-  //   // Public can read
-  //   allow.publicApiKey() //.to(['create', 'read']),
-  // ]),
 
    // ROOM
    Room: a
@@ -75,6 +57,7 @@ const schema = a.schema({
        allow.authenticated().to(['read']),
        allow.publicApiKey().to(['read'])],
      ),
+     winners: a.string().array(),
 
      gameStartTime: a.datetime(),
 
@@ -90,7 +73,6 @@ const schema = a.schema({
 
      spectators: a.string().array(),
      currentRound: a.integer(),
-     winner: a.string(),
 
      // standard
      owner: a.string().required(),

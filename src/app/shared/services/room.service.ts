@@ -11,7 +11,6 @@ type Room = Schema['Room']['type'];
 export class RoomService {
 
 
-
 room = new BehaviorSubject<any>(null);
 
 roomList = new BehaviorSubject<any[]>([]);
@@ -90,6 +89,22 @@ removeFromRoomList(id: string) {
   const currentList = this.roomList.getValue();
   const newList = currentList.filter((room) => room.id !== id);
   this.roomList.next(newList);
+}
+
+async updateRoomWithWinners(id: any, winners: any[]) {
+  const client = generateClient<Schema>({ authMode: 'userPool' })
+  let res;
+  try {
+    res = (await client.models.Room.update({
+      id,
+      winners
+    })).data;
+
+    console.log('updateRoomWithWinners', res)
+    this.room.next(res)
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 

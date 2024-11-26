@@ -212,14 +212,9 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
 
   playerScore(message: any) {
     console.log('PlayerScore', message)
-
-    const player = this.players.get(message.player.id);
-    if (player) {
-      player.player.score = message.player.score + 1;
-    } else {
-
-    //  this.players.set(message.player.id, { player: { ...message.player }, keys: message.keys, screenSize: message.screenSize });
-    }
+    // TODO output
+    this.playerScoreEmit.emit(message)
+   
   }
 
 

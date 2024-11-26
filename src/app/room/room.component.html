@@ -14,7 +14,9 @@
       <app-lobby (startGameEmit)="startGame()" *ngIf="gameState == 'lobby'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-lobby>
       <!-- <app-controller [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-controller> -->
       <app-countdown (startGameEmit)="playGame()" *ngIf="gameState == 'countdown'" [room]="room"></app-countdown>
-      <app-game-room *ngIf="gameState =='playing'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-game-room>
+      <app-game-room (playerScoreEmit)="playerScored($event)" *ngIf="gameState =='playing'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-game-room>
+
+      <app-podium *ngIf="gameState == 'podium'" [room]="room" [playersScore]="playersScore"></app-podium>
 
     </div>
   </div>
