@@ -1,0 +1,16 @@
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Full viewport height */
+    padding: 1rem;
+    flex-grow: 1; /* Take up available space */
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .chat-content {
+    flex: 1; /* Take up available space */
+    overflow-y: auto; /* Scrollable content */
+    margin-bottom: 1rem;
+  }
+  

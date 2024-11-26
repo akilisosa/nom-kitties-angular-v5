@@ -20,9 +20,9 @@
           Local Game <span>&nbsp;</span> <mat-icon>sports_esports</mat-icon>
         </button>
 
-        <button mat-raised-button color="primary" (click)="view = 'enterCode'" class="full-width">
+        <!-- <button mat-raised-button color="primary" (click)="view = 'enterCode'" class="full-width">
           Enter Code <span>&nbsp;</span> <mat-icon>videogame_asset</mat-icon>
-        </button>
+        </button> -->
         
         <button mat-raised-button color="warn" routerLink="/learn-more" class="full-width">
           Learn More <span>&nbsp;</span> <mat-icon>help_outline</mat-icon>
@@ -32,7 +32,7 @@
         <ng-container *ngIf="view === 'enterCode'">
          <form [formGroup]="joinGameForm">
           <mat-form-field class="full-width">
-            <input formControlName="simpleCode" matInput placeholder="Enter Code" />
+            <input formControlName="simpleCode" maxlength="6" matInput placeholder="Enter Code" />
           </mat-form-field>
         </form>
 

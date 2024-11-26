@@ -127,13 +127,9 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
         winners.push(key);
       }
     }
-    // if(this.kitty = this.room.owner) {
 
     this.roomService.updateRoomWithWinners(this.room.id, winners);
 
-    // }
-   
-    // You might want to emit an event
 
   }
 
@@ -185,9 +181,15 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.log('subscribing to room')
       this.roomService.subscribeToRoomByCode(lastSegment).subscribe((room) => {
         console.log('room subscription', room);
+
+        this.room = {...room.items[0]};
       if( room.items[0].status === 'FINISHED') {
         this.gameState = 'podium';
         this.room = {...room.items[0]};
+      }
+
+      if (room.items[0].status === 'STARTING') {
+        this.gameState = 'countdown';
       }
 
       if(room.items[0].status === 'PLAYING') {
@@ -213,26 +215,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       players = [...players, curr?.userId];
       this.room = (await this.roomService.joinRoom(this.room.id, players));
     }
-
-    // if playing or countdown return
-    this.subscription.add(this.roomService.subscribeToRoomByID(this.room.id).subscribe((room) => {
-      this.room = { ...room };
-      console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
-
-      if (room.status === 'STARTING') {
-        this.gameState = 'countdown';
-      }
-
-      if (room.status === 'PLAYING') {
-        this.gameState = 'playing';
-        this.startGameCountdown();
-      }
-
-      if (room.status === 'FINISHED') {
-        this.gameState = 'podium';
-      }
-    }));
-
 
   }
 
@@ -268,17 +250,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   }
 
-  subscribeToRoom() {
-    this.subscription.add(this.roomService.room.subscribe(async (room: any) => {
-      if (room) {
-        this.room = { ...room };
-        const curr = await this.authService.getCurrentUser();
-        if (this.room.owner !== curr.userId) {
-          await this.joinGame(this.room.id, curr);
-        }
-      }
-    }));
-  }
 
   roomDoesntExist() {
     this.router.navigate(['/game-hub']);

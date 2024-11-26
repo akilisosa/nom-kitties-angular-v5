@@ -1,4 +1,14 @@
-<p>podium works!</p>
 
-<p>Winner!!!</p>
-<p>{{room.winners || 'everyone'}}</p>
+<p>Thanks for playing Nom Kitties</p>
+
+<p>We have a Winner!!!</p>
+
+<ng-container *ngFor="let kitty of winners">
+    <mat-icon svgIcon="kitty" [ngStyle]="{'color': kitty.color}"></mat-icon>
+   
+    <p>{{kitty.name}}</p>
+
+
+    </ng-container>
+
+<p>id(s): {{room.winners || 'everyone'}}</p>

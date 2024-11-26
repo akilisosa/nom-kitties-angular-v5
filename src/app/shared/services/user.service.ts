@@ -19,6 +19,22 @@ export class UserService {
     return this.user.asObservable();
   }
 
+  async getUserByOwnerID(owner: string) {
+    const client = generateClient<Schema>({ authMode: 'apiKey' });
+    let res;
+
+    try {
+      res = (await client.models.User.list({
+        filter: {
+          owner: { eq: owner }
+        }
+       })).data[0] 
+    } catch (error) {
+      console.error(error);
+    }
+    return res;
+  }
+
   async getUser() {
     const client = generateClient<Schema>({ authMode: 'userPool' });
     const owner = (await this.authService.getCurrentUser()).userId;

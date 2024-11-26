@@ -30,6 +30,7 @@ const schema = a.schema({
     .authorization((allow: any) => [
       // Owner can do all operations
       allow.owner(),
+      allow.authenticated().to(['read']),
       // Public can read
       allow.publicApiKey().to(['read']),
     ]),
