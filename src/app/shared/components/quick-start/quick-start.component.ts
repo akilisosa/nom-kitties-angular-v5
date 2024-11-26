@@ -74,7 +74,7 @@ export class QuickStartComponent implements OnInit {
 
   async joinGameWithCode() {
     this.view = 'loading'
-    const code = this.joinGameForm.value.simpleCode;
+    const code = this.joinGameForm.value.simpleCode?.toLocaleLowerCase();
     if (!code) {
       this.view = 'join';
       return;

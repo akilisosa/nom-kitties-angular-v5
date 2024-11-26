@@ -391,7 +391,6 @@ export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
         this.ctx.closePath();
       }
     });
-
     this.animationFrameId = requestAnimationFrame(() => this.gameLoop());
   }
 
