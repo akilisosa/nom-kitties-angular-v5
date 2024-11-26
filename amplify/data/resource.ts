@@ -57,6 +57,7 @@ const schema = a.schema({
        allow.authenticated().to(['read']),
        allow.publicApiKey().to(['read'])],
      ),
+     
      winners: a.string().array(),
 
      gameStartTime: a.datetime(),

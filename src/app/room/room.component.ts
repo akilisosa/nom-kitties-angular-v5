@@ -180,14 +180,20 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     } catch (error) {
       console.error('Error getting current user:', error);
     }
+
     try {
       console.log('subscribing to room')
       this.roomService.subscribeToRoomByCode(lastSegment).subscribe((room) => {
         console.log('room subscription', room);
-        // if (room) {
-        //   this.room = { ...room };
-        //   console.log('roomconsole.log()', this.room, this.room.updatedAt, this.room.updatedAt);
-        // }
+      if( room.items[0].status === 'FINISHED') {
+        this.gameState = 'podium';
+        this.room = {...room.items[0]};
+      }
+
+      if(room.items[0].status === 'PLAYING') {
+        this.gameState = 'playing';
+        this.startGameCountdown();
+      }
       });
     } catch (error) {
       console.error('Error subscribing to room:', error);
@@ -220,6 +226,10 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       if (room.status === 'PLAYING') {
         this.gameState = 'playing';
         this.startGameCountdown();
+      }
+
+      if (room.status === 'FINISHED') {
+        this.gameState = 'podium';
       }
     }));
 

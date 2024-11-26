@@ -97,8 +97,9 @@ async updateRoomWithWinners(id: any, winners: any[]) {
   try {
     res = (await client.models.Room.update({
       id,
-      winners
-    })).data;
+      winners,
+      status: 'FINISHED'
+    } as any)).data;
 
     console.log('updateRoomWithWinners', res)
     this.room.next(res)
