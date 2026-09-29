@@ -1,5 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { AfterViewChecked, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -13,11 +21,10 @@ import { UserService } from '../shared/services/user.service';
 import { LobbyComponent } from './components/lobby/lobby.component';
 import { CountdownComponent } from './components/countdown/countdown.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PodiumComponent } from "./components/podium/podium.component";
+import { PodiumComponent } from './components/podium/podium.component';
 @Component({
   standalone: true,
   imports: [
-    CommonModule,
     MatToolbarModule,
     MatButtonModule,
     MatDialogModule,
@@ -26,10 +33,10 @@ import { PodiumComponent } from "./components/podium/podium.component";
     GameRoomComponent,
     CountdownComponent,
     MatProgressSpinnerModule,
-    PodiumComponent
-],
+    PodiumComponent,
+  ],
   templateUrl: './room.component.html',
-  styleUrl: './room.component.css'
+  styleUrl: './room.component.css',
 })
 export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('lobbyContainer', { static: true }) lobbyContainer!: ElementRef;
@@ -62,30 +69,26 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   private countdownInterval: any;
   timeRemaining = new BehaviorSubject<number>(30);
 
-
-
-
-
   subscription = new Subscription();
-  constructor(private roomService: RoomService,
+  constructor(
+    private roomService: RoomService,
     private router: Router,
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
     private userService: UserService,
-    private authService: AuthService) {
+    private authService: AuthService,
+  ) {
     this.roomCode = this.route.snapshot.paramMap.get('id')!;
   }
 
   ngOnInit() {
     this.getRoom();
     console.log('room is working', this.room);
-    this.mobile = this.isMobileDevice()
+    this.mobile = this.isMobileDevice();
   }
 
-
   ngAfterViewChecked() {
-
     const now = Date.now();
     if (now - this.lastCheck < this.CHECK_INTERVAL) {
       return;
@@ -103,7 +106,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       }
       this.cdr.detectChanges();
     }
-
   }
 
   ngOnDestroy() {
@@ -119,7 +121,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     let maxScore = 0;
     let winners = [];
 
-    for(const [key, value] of this.playersScore.entries()) {
+    for (const [key, value] of this.playersScore.entries()) {
       if (value > maxScore) {
         maxScore = value;
         winners = [key];
@@ -129,25 +131,21 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     this.roomService.updateRoomWithWinners(this.room.id, winners);
-
-
   }
 
   playerScored(event: any) {
     const id = event.player.id;
-    console.log()
+    console.log();
     let playerScore = this.playersScore.get(id) || 0;
     playerScore++;
     this.playersScore.set(id, playerScore);
   }
-
 
   async cancel() {
     this.isModalOpen = false;
   }
 
   async joinGame(id: string, curr: any) {
-
     if (!this.room?.id) {
       return;
     }
@@ -178,29 +176,28 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     try {
-      console.log('subscribing to room')
+      console.log('subscribing to room');
       this.roomService.subscribeToRoomByCode(lastSegment).subscribe((room) => {
         console.log('room subscription', room);
 
-        this.room = {...room.items[0]};
-      if( room.items[0].status === 'FINISHED') {
-        this.gameState = 'podium';
-        this.room = {...room.items[0]};
-      }
+        this.room = { ...room.items[0] };
+        if (room.items[0].status === 'FINISHED') {
+          this.gameState = 'podium';
+          this.room = { ...room.items[0] };
+        }
 
-      if (room.items[0].status === 'STARTING') {
-        this.gameState = 'countdown';
-      }
+        if (room.items[0].status === 'STARTING') {
+          this.gameState = 'countdown';
+        }
 
-      if(room.items[0].status === 'PLAYING') {
-        this.gameState = 'playing';
-        this.startGameCountdown();
-      }
+        if (room.items[0].status === 'PLAYING') {
+          this.gameState = 'playing';
+          this.startGameCountdown();
+        }
       });
     } catch (error) {
       console.error('Error subscribing to room:', error);
     }
-
 
     this.room = await this.roomService.getRoomByCode(lastSegment);
     console.log('currernt user', this.room);
@@ -213,9 +210,8 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     console.log('players', players);
     if (!players.includes(curr?.userId)) {
       players = [...players, curr?.userId];
-      this.room = (await this.roomService.joinRoom(this.room.id, players));
+      this.room = await this.roomService.joinRoom(this.room.id, players);
     }
-
   }
 
   startGameCountdown() {
@@ -247,15 +243,14 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.handleTimeUp();
       }
     }, 1000);
-
   }
-
 
   roomDoesntExist() {
     this.router.navigate(['/game-hub']);
   }
 
-  async startGame() { // 5 seconds in the future
+  async startGame() {
+    // 5 seconds in the future
     const gameStartTime = new Date(Date.now() + 5000).toISOString();
     console.log('room', this.room, this.room.updatedAt, this.room.updatedAt);
 
@@ -271,7 +266,10 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     // Create a copy of players array to avoid modifying original
     const availablePlayers = [...this.room.players];
-    const numPlayersNeeded = Math.min(this.room.playersPerRound, availablePlayers.length);
+    const numPlayersNeeded = Math.min(
+      this.room.playersPerRound,
+      availablePlayers.length,
+    );
     const selectedPlayers: string[] = [];
 
     // Randomly select players
@@ -296,7 +294,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       height: '100%',
       maxWidth: '100%',
       maxHeight: '100%',
-      panelClass: 'full-screen-dialog'
+      panelClass: 'full-screen-dialog',
     });
   }
 
@@ -317,15 +315,16 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.roomService.updateRoomWithPlayer(this.room.id, newPlayers);
     }
 
-
     await this.router.navigate(['/game-hub']);
   }
 
   // util
   private isMobileDevice(): any {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      ) ||
+      (navigator.maxTouchPoints && navigator.maxTouchPoints > 2)
+    );
   }
-
-
 }

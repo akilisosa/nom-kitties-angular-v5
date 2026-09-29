@@ -99,7 +99,7 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   }
 
   @HostListener('window:keydown.space', ['$event'])
-  handleSpaceBar(event: KeyboardEvent) {
+  handleSpaceBar(event: Event) {
     event.preventDefault(); // Prevent page scrolling
     if (this.active) {
       this.pauseGame()

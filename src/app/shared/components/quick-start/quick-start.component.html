@@ -1,27 +1,31 @@
-<div class="flex-column" style="justify-content: center; margin:1rem;">
-  <ng-container *ngIf="view === 'loading'">
+<div class="flex-column" style="justify-content: center; margin: 1rem">
+  @if (view === "loading") {
     <mat-spinner></mat-spinner>
-  </ng-container>
+  }
 
-    <ng-container *ngIf="view === 'quickstart'">
-      <button mat-raised-button color="primary" (click)="view = 'start'">
-        Start A Game &nbsp;<mat-icon>rocket</mat-icon>
-      </button>
-      <button mat-raised-button color="accent" *ngIf="!showRefresh" (click)="joinGame()">
+  @if (view === "quickstart") {
+    <button mat-raised-button color="primary" (click)="view = 'start'">
+      Start A Game &nbsp;<mat-icon>rocket</mat-icon>
+    </button>
+    @if (!showRefresh) {
+      <button mat-raised-button color="accent" (click)="joinGame()">
         Join Game &nbsp;<mat-icon>sports_football</mat-icon>
       </button>
-      <button mat-raised-button color="accent" *ngIf="showRefresh" (click)="refreshEmit.emit()">
+    }
+    @if (showRefresh) {
+      <button mat-raised-button color="accent" (click)="refreshEmit.emit()">
         Refresh List &nbsp;<mat-icon>refresh</mat-icon>
       </button>
-      <button mat-raised-button color="warn" (click)="view = 'private'">
-        Enter A Code &nbsp;<mat-icon>code</mat-icon>
-      </button>
-    </ng-container>
-    <ng-container *ngIf="view === 'start'">
-      <form [formGroup]="newGameForm">
-        <div class="flex-column">
+    }
+    <button mat-raised-button color="warn" (click)="view = 'private'">
+      Enter A Code &nbsp;<mat-icon>code</mat-icon>
+    </button>
+  }
+  @if (view === "start") {
+    <form [formGroup]="newGameForm">
+      <div class="flex-column">
         <mat-slide-toggle formControlName="public">
-          {{ newGameForm.controls.public.value ? 'Public' : 'Private' }}
+          {{ newGameForm.controls.public.value ? "Public" : "Private" }}
         </mat-slide-toggle>
         <mat-form-field appearance="fill">
           <mat-label>No of Players</mat-label>
@@ -51,22 +55,29 @@
           </mat-select>
         </mat-form-field>
       </div>
-      </form>
-      <button mat-raised-button color="primary" (click)="startGame()">Start A Game</button>
-      <button mat-raised-button color="warn" (click)="view = 'quickstart'">Cancel</button>
-    </ng-container>
+    </form>
+    <button mat-raised-button color="primary" (click)="startGame()">
+      Start A Game
+    </button>
+    <button mat-raised-button color="warn" (click)="view = 'quickstart'">
+      Cancel
+    </button>
+  }
 
-
-    <ng-container *ngIf="view === 'private'">
-      <form [formGroup]="joinGameForm">
-        <div style=" margin:auto; display:flex; justify-content: center;">
-        <mat-form-field appearance="fill" style="width:100%; max-width: 300px;">
+  @if (view === "private") {
+    <form [formGroup]="joinGameForm">
+      <div style="margin: auto; display: flex; justify-content: center">
+        <mat-form-field appearance="fill" style="width: 100%; max-width: 300px">
           <mat-label>Enter Code</mat-label>
-          <input matInput formControlName="simpleCode" maxLength="6">
+          <input matInput formControlName="simpleCode" maxLength="6" />
         </mat-form-field>
       </div>
-      </form>
-      <button mat-raised-button color="primary" (click)="joinGameWithCode()">Join Game</button>
-      <button mat-raised-button color="warn" (click)="view = 'quickstart'">Cancel</button>
-    </ng-container>
-  </div>
+    </form>
+    <button mat-raised-button color="primary" (click)="joinGameWithCode()">
+      Join Game
+    </button>
+    <button mat-raised-button color="warn" (click)="view = 'quickstart'">
+      Cancel
+    </button>
+  }
+</div>

@@ -1,12 +1,18 @@
-import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Output,
+  ViewChild,
+} from '@angular/core';
 
 @Component({
   selector: 'app-joystick',
   templateUrl: './joystick.component.html',
   styleUrls: ['./joystick.component.css'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [],
 })
 export class JoystickComponent {
   @Output() directionChange = new EventEmitter<any>();
@@ -16,7 +22,12 @@ export class JoystickComponent {
   private startX = 0;
   private startY = 0;
   private isDragging = false;
-  private lastEmittedDirection: { w: boolean, s: boolean, a: boolean, d: boolean } = { w: false, s: false, a: false, d: false };
+  private lastEmittedDirection: {
+    w: boolean;
+    s: boolean;
+    a: boolean;
+    d: boolean;
+  } = { w: false, s: false, a: false, d: false };
 
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
@@ -52,28 +63,39 @@ export class JoystickComponent {
     this.lastEmittedDirection = { w: false, s: false, a: false, d: false };
   }
 
-
   private readonly TOLERANCE = Math.PI / 8; // Made constant
-  private readonly DIRECTIONS = [ // Pre-defined directions array
+  private readonly DIRECTIONS = [
+    // Pre-defined directions array
     { angle: 0, keys: { w: false, s: false, a: false, d: true } },
     { angle: Math.PI / 4, keys: { w: false, s: true, a: false, d: true } },
     { angle: Math.PI / 2, keys: { w: false, s: true, a: false, d: false } },
-    { angle: (3 * Math.PI) / 4, keys: { w: false, s: true, a: true, d: false } },
+    {
+      angle: (3 * Math.PI) / 4,
+      keys: { w: false, s: true, a: true, d: false },
+    },
     { angle: Math.PI, keys: { w: false, s: false, a: true, d: false } },
-    { angle: (-3 * Math.PI) / 4, keys: { w: true, s: false, a: true, d: false } },
+    {
+      angle: (-3 * Math.PI) / 4,
+      keys: { w: true, s: false, a: true, d: false },
+    },
     { angle: -Math.PI / 2, keys: { w: true, s: false, a: false, d: false } },
-    { angle: -Math.PI / 4, keys: { w: false, s: false, a: false, d: true } }
+    { angle: -Math.PI / 4, keys: { w: false, s: false, a: false, d: true } },
   ] as const;
 
   private updateDirection(angle: number): void {
     // Find the closest direction
-    const matchedDirection = this.DIRECTIONS.find(dir =>
-      angle >= dir.angle - this.TOLERANCE && angle < dir.angle + this.TOLERANCE
+    const matchedDirection = this.DIRECTIONS.find(
+      (dir) =>
+        angle >= dir.angle - this.TOLERANCE &&
+        angle < dir.angle + this.TOLERANCE,
     );
 
     if (matchedDirection) {
       const hasChanged = Object.entries(matchedDirection.keys).some(
-        ([key, value]) => this.lastEmittedDirection[key as keyof typeof matchedDirection.keys] !== value
+        ([key, value]) =>
+          this.lastEmittedDirection[
+            key as keyof typeof matchedDirection.keys
+          ] !== value,
       );
 
       if (hasChanged) {

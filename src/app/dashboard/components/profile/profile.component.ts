@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../../shared/services/user.service';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,18 +12,16 @@ import { AuthService } from '../../../shared/services/auth.service';
 @Component({
   selector: 'app-profile',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './profile.component.html',
-  styleUrl: './profile.component.css'
+  styleUrl: './profile.component.css',
 })
 export class ProfileComponent implements OnInit {
-
   user: any;
 
   form = new FormGroup({
@@ -31,17 +29,18 @@ export class ProfileComponent implements OnInit {
     owner: new FormControl(''),
     name: new FormControl('Kitty123'),
     color: new FormControl('#a85c32'),
-    type: new FormControl('cat')
+    type: new FormControl('cat'),
   });
-
 
   subscription = new Subscription();
 
   loading = false;
 
-  constructor(private userService: UserService,
+  constructor(
+    private userService: UserService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef) { }
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
     this.subcribeToUser();
@@ -50,14 +49,14 @@ export class ProfileComponent implements OnInit {
 
   async getUser() {
     this.loading = true;
-    const user = this.userService.user.getValue()
-    if(!user) {
-     this.user =  await this.userService.getUser();
-     console.log('user', this.user);
-     if(!this.user) {
-      const owner = (await this.authService.getCurrentUser()).userId
-      this.user = await this.userService.save({...this.form.value, owner});
-     }
+    const user = this.userService.user.getValue();
+    if (!user) {
+      this.user = await this.userService.getUser();
+      console.log('user', this.user);
+      if (!this.user) {
+        const owner = (await this.authService.getCurrentUser()).userId;
+        this.user = await this.userService.save({ ...this.form.value, owner });
+      }
     }
     this.loading = false;
   }
@@ -69,16 +68,15 @@ export class ProfileComponent implements OnInit {
           this.form.patchValue(user);
           this.cdr.detectChanges();
         }
-      })
+      }),
     );
   }
 
   async save() {
     this.loading = true;
-  const user= await this.userService.save(this.form.value);
+    const user = await this.userService.save(this.form.value);
     console.log('user', user);
-   this.form.markAsPristine();
-   this.loading = false;
+    this.form.markAsPristine();
+    this.loading = false;
   }
-
 }

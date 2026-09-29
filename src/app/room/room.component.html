@@ -1,46 +1,84 @@
 <div class="content">
-  
-    <div style="width:100%; display:flex; flex-direction:row; justify-content: space-between; margin: 1rem;">
-      <button mat-raised-button color="secondary" (click)="openChat()">Chat</button>
-      <button mat-raised-button  *ngIf="gameState == 'lobby'"  color="accent">Lobby</button>
-     
-      <button mat-raised-button *ngIf="gameState == 'playing'" color="accent">{{timeRemaining.value}}</button>
-      <button mat-raised-button color="warn" (click)="leaveRoom()">Leave Room</button>
-    </div>
-  
-    <div id="lobbyContainer" #lobbyContainer style="width: 100%; height: 80vh;">
+  <div
+    style="
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin: 1rem;
+    "
+  >
+    <button mat-raised-button color="secondary" (click)="openChat()">
+      Chat
+    </button>
+    @if (gameState == "lobby") {
+      <button mat-raised-button color="accent">Lobby</button>
+    }
 
-     
-      <app-lobby (startGameEmit)="startGame()" *ngIf="gameState == 'lobby'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-lobby>
-      <!-- <app-controller [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-controller> -->
-      <app-countdown (startGameEmit)="playGame()" *ngIf="gameState == 'countdown'" [room]="room"></app-countdown>
-      <app-game-room (playerScoreEmit)="playerScored($event)" *ngIf="gameState =='playing'" [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-game-room>
-
-      <app-podium *ngIf="gameState == 'podium'" [room]="room" [playersScore]="playersScore"></app-podium>
-
-    </div>
+    @if (gameState == "playing") {
+      <button mat-raised-button color="accent">
+        {{ timeRemaining.value }}
+      </button>
+    }
+    <button mat-raised-button color="warn" (click)="leaveRoom()">
+      Leave Room
+    </button>
   </div>
-  
-  <ng-template #chatDialog>
 
-    <h2 mat-dialog-title>
-      <div style="display:flex; flex-direction: row; align-items: center; justify-content: space-between;">
-          <div style="display:flex; flex-direction: row; align-items: center;">
-        <img src="assets/icon/favicon.png" style="width: 30px; height: 30px; margin-inline-end: 1rem;">
+  <div id="lobbyContainer" #lobbyContainer style="width: 100%; height: 80vh">
+    @if (gameState == "lobby") {
+      <app-lobby
+        (startGameEmit)="startGame()"
+        [isModalOpen]="isModalOpen"
+        [size]="gameSize"
+        [room]="room"
+        [playerList]="playerList"
+      ></app-lobby>
+    }
+    <!-- <app-controller [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-controller> -->
+    @if (gameState == "countdown") {
+      <app-countdown (startGameEmit)="playGame()" [room]="room"></app-countdown>
+    }
+    @if (gameState == "playing") {
+      <app-game-room
+        (playerScoreEmit)="playerScored($event)"
+        [isModalOpen]="isModalOpen"
+        [size]="gameSize"
+        [room]="room"
+        [playerList]="playerList"
+      ></app-game-room>
+    }
+
+    @if (gameState == "podium") {
+      <app-podium [room]="room" [playersScore]="playersScore"></app-podium>
+    }
+  </div>
+</div>
+
+<ng-template #chatDialog>
+  <h2 mat-dialog-title>
+    <div
+      style="
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      "
+    >
+      <div style="display: flex; flex-direction: row; align-items: center">
+        <img
+          src="assets/icon/favicon.png"
+          style="width: 30px; height: 30px; margin-inline-end: 1rem"
+        />
         Chat: {{ room?.simpleCode }}
       </div>
 
-        <mat-dialog-actions>
-          <button mat-button (click)="closeChat()">Close</button>
-        </mat-dialog-actions>
-      </div>
-
-  
-    </h2>
-    <mat-dialog-content>
-      <app-chat-room [id]="room.id"></app-chat-room>
-    </mat-dialog-content>
-
-    
-
-  </ng-template>
+      <mat-dialog-actions>
+        <button mat-button (click)="closeChat()">Close</button>
+      </mat-dialog-actions>
+    </div>
+  </h2>
+  <mat-dialog-content>
+    <app-chat-room [id]="room.id"></app-chat-room>
+  </mat-dialog-content>
+</ng-template>

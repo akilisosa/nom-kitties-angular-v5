@@ -1,27 +1,37 @@
-<div  class="chat-container">
+<div class="chat-container">
   <div class="chat-content" #chatContainer id="chatContainer">
-    <ng-container *ngFor="let message of chatMessageList">
+    @for (message of chatMessageList; track message) {
       <div>
         <mat-card>
           <mat-card-header>
             <mat-card-subtitle>
-              <div style="display:flex; flex-direction: row; align-items: center;">
-                <mat-icon svgIcon="kitty" [ngStyle]="{'color': message.user.color}"></mat-icon>
-                {{message.user.name}}
+              <div
+                style="display: flex; flex-direction: row; align-items: center"
+              >
+                <mat-icon
+                  svgIcon="kitty"
+                  [ngStyle]="{ color: message.user.color }"
+                ></mat-icon>
+                {{ message.user.name }}
               </div>
             </mat-card-subtitle>
             <mat-card-title>{{ message.message }}</mat-card-title>
           </mat-card-header>
         </mat-card>
       </div>
-    </ng-container>
+    }
   </div>
 
   <div class="chat-input">
     <mat-form-field appearance="fill" class="message-input">
       <mat-label>Message</mat-label>
-      <input matInput [formControl]="message" placeholder="Enter text">
-      <button mat-icon-button matSuffix (click)="sendChat()" aria-label="Send message">
+      <input matInput [formControl]="message" placeholder="Enter text" />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="sendChat()"
+        aria-label="Send message"
+      >
         <mat-icon>send</mat-icon>
       </button>
     </mat-form-field>

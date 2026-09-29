@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,7 +15,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-quick-start',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -24,14 +22,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatSelectModule,
     MatSlideToggleModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './quick-start.component.html',
-  styleUrl: './quick-start.component.css'
+  styleUrl: './quick-start.component.css',
 })
 export class QuickStartComponent implements OnInit {
-
-  @Input() showRefresh: boolean = false; 
+  @Input() showRefresh: boolean = false;
   @Output() refreshEmit = new EventEmitter<void>();
 
   view: 'quickstart' | 'start' | 'join' | 'private' | 'loading' = 'quickstart';
@@ -42,21 +39,23 @@ export class QuickStartComponent implements OnInit {
     totalRounds: new FormControl(3),
     timeLimit: new FormControl(30),
     playersPerRound: new FormControl(4),
-    
+
     roomLimit: new FormControl(4),
     simpleCode: new FormControl(''),
-    name:   new FormControl('example'),
-  })
+    name: new FormControl('example'),
+  });
 
   joinGameForm = new FormGroup({
     simpleCode: new FormControl(''),
-  })
+  });
 
   loading = false;
 
-  constructor(private roomService: RoomService,
+  constructor(
+    private roomService: RoomService,
     private router: Router,
-    private authService: AuthService) { }
+    private authService: AuthService,
+  ) {}
 
   ngOnInit() {
     const code = this.generate6DigitAlphaNumericCode();
@@ -73,7 +72,7 @@ export class QuickStartComponent implements OnInit {
   }
 
   async joinGameWithCode() {
-    this.view = 'loading'
+    this.view = 'loading';
     const code = this.joinGameForm.value.simpleCode?.toLocaleLowerCase();
     if (!code) {
       this.view = 'join';
@@ -84,16 +83,14 @@ export class QuickStartComponent implements OnInit {
       this.view = 'join';
       return;
     }
-    this.router.navigate([ 'room', code]);
-  
+    this.router.navigate(['room', code]);
   }
 
-
   async startGame() {
-    // todo check for room generated code. 
-    this.view = 'loading'
-    const owner = (await this.authService.getCurrentUser()).userId
-    
+    // todo check for room generated code.
+    this.view = 'loading';
+    const owner = (await this.authService.getCurrentUser()).userId;
+
     await this.roomService.createNewRoom({
       ...this.newGameForm.value,
       public: this.newGameForm.value.public ? 'public' : 'private',
@@ -101,16 +98,13 @@ export class QuickStartComponent implements OnInit {
       owner,
       status: 'WAITING',
       createdAt: new Date().toISOString(),
-    })
+    });
 
     this.generate6DigitAlphaNumericCode();
 
-    
     this.loading = false;
 
-    this.router.navigate([ 'room', this.newGameForm.value.simpleCode]);
-
-    
+    this.router.navigate(['room', this.newGameForm.value.simpleCode]);
   }
 
   joinGame() {
@@ -120,5 +114,4 @@ export class QuickStartComponent implements OnInit {
   joinPrivate() {
     console.log('private game');
   }
-
 }

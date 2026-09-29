@@ -50,7 +50,7 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
 
   // listen to enter input
   @HostListener('document:keydown.enter', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
+  handleKeyboardEvent(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.value && this.user.name) {
       this.sendChat()

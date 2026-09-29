@@ -1,25 +1,38 @@
 <div class="content">
-    <app-quick-start [showRefresh]="true" (refreshEmit)="refreshList()"></app-quick-start>
-    <div>
-      <mat-toolbar>
-        <div style="display:flex; flex-direction: row; align-items: center;">
-          <img src="assets/icon/favicon.png" style="width: 30px; height: 30px; margin-inline-end: 1rem;">
-          <span>Public Games:</span>
-        </div>
-        <span class="spacer"></span>
-        <button mat-icon-button>
-          <mat-icon>filter_list</mat-icon>
-        </button>
-      </mat-toolbar>
-    </div>
-  
-    <mat-list>
-      <mat-list-item *ngFor="let game of roomList" (click)="joinGame(game)"
-      matRipple
-      [matRippleColor]="'rgba(0,0,0,0.1)'">
-        
-        <span class="flex-row pointer" style="align-items: center; justify-content: space-between;"><span>{{game.simpleCode}} - {{game.mode}} </span>   <span> <mat-icon mat-list-icon>sports_esports</mat-icon></span></span>
-  
-      </mat-list-item>
-    </mat-list>
+  <app-quick-start
+    [showRefresh]="true"
+    (refreshEmit)="refreshList()"
+  ></app-quick-start>
+  <div>
+    <mat-toolbar>
+      <div style="display: flex; flex-direction: row; align-items: center">
+        <img
+          src="assets/icon/favicon.png"
+          style="width: 30px; height: 30px; margin-inline-end: 1rem"
+        />
+        <span>Public Games:</span>
+      </div>
+      <span class="spacer"></span>
+      <button mat-icon-button>
+        <mat-icon>filter_list</mat-icon>
+      </button>
+    </mat-toolbar>
   </div>
+
+  <mat-list>
+    @for (game of roomList; track game) {
+      <mat-list-item
+        (click)="joinGame(game)"
+        matRipple
+        [matRippleColor]="'rgba(0,0,0,0.1)'"
+      >
+        <span
+          class="flex-row pointer"
+          style="align-items: center; justify-content: space-between"
+          ><span>{{ game.simpleCode }} - {{ game.mode }} </span>
+          <span> <mat-icon mat-list-icon>sports_esports</mat-icon></span></span
+        >
+      </mat-list-item>
+    }
+  </mat-list>
+</div>
