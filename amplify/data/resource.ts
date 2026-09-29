@@ -106,7 +106,8 @@ export const data = defineData({
     defaultAuthorizationMode: 'userPool',
     // API Key is used for a.allow.public() rules
     apiKeyAuthorizationMode: {
-      expiresInDays: 30,
+      // 365 is the maximum. The key expires after this; bump/rotate (redeploy with a changed value) at least yearly.
+      expiresInDays: 365,
     },
   },
 });
