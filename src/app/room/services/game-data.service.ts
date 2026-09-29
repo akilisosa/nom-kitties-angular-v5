@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 
 interface WebSocketMessage {
   type: string;
@@ -96,7 +95,7 @@ export class GameDataService {
 
     const subscriptionMessage: WebSocketMessage = {
       type: 'subscribe',
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       channel: channelPath,
       authorization: {
         'x-api-key': this.API_KEY,
@@ -141,7 +140,7 @@ export class GameDataService {
 
     const message = {
       type: 'data',
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       channel: channelPath,
       authorization: {
         'x-api-key': this.API_KEY,

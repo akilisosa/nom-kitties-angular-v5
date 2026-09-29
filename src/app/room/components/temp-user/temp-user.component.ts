@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Subscription } from 'rxjs';
-import { v4 } from 'uuid';
 
 @Component({
   selector: 'app-temp-user',
@@ -59,7 +58,7 @@ export class TempUserComponent {
         }
         if(!user) {
           /// set id to uuid
-          this.form.patchValue({ id: v4(), owner: v4() });
+          this.form.patchValue({ id: crypto.randomUUID(), owner: crypto.randomUUID() });
           this.save()
          // this.form.patchValue(this.form.value);
         }
