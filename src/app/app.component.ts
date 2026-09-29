@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Amplify } from 'aws-amplify';
 import outputs from '../../amplify_outputs.json';
 import {
@@ -24,6 +24,7 @@ Amplify.configure(outputs);
   templateUrl: './app.component.html',
   standalone: true,
   styleUrl: './app.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     RouterOutlet,
     RouterLink,

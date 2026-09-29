@@ -1,4 +1,11 @@
-import { Component, Input, EventEmitter, Output, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  EventEmitter,
+  Output,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
   templateUrl: './player1.component.html',
   styleUrls: ['./player1.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
 })
 export class Player1Component implements OnInit {

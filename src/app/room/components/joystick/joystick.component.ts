@@ -5,6 +5,7 @@ import {
   HostListener,
   Output,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 @Component({
@@ -12,6 +13,7 @@ import {
   templateUrl: './joystick.component.html',
   styleUrls: ['./joystick.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [],
 })
 export class JoystickComponent {

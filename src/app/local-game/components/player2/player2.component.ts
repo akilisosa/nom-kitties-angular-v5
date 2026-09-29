@@ -1,4 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,6 +14,7 @@ import { MatInputModule } from '@angular/material/input';
   imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
   standalone: true,
   templateUrl: './player2.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './player2.component.css',
 })
 export class Player2Component {

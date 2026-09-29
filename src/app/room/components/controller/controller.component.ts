@@ -1,19 +1,25 @@
-import { Component, HostListener, Input } from '@angular/core';
-import { GameRoomComponent } from "../game-room/game-room.component";
+import {
+  Component,
+  HostListener,
+  Input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { GameRoomComponent } from '../game-room/game-room.component';
 
 @Component({
   selector: 'app-controller',
   standalone: true,
-  imports: [ ],
+  imports: [],
   templateUrl: './controller.component.html',
-  styleUrl: './controller.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './controller.component.css',
 })
 export class ControllerComponent {
   direction: string = '';
-  
+
   @Input() room: any;
   @Input() size: number = 500;
-  @Input() playerList: any[] = []
+  @Input() playerList: any[] = [];
   @Input() isModalOpen: boolean = false;
 
   @HostListener('window:keydown', ['$event'])

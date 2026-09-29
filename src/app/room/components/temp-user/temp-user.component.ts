@@ -1,4 +1,8 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { TempUserService } from '../../../shared/services/temp-user.service';
 
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -19,6 +23,7 @@ import { Subscription } from 'rxjs';
   ],
   standalone: true,
   templateUrl: './temp-user.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './temp-user.component.css',
 })
 export class TempUserComponent {

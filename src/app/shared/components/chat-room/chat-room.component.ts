@@ -1,4 +1,15 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -11,67 +22,71 @@ import { ChatService } from '../../services/chat.service';
 import { GameDataService } from '../../../room/services/game-data.service';
 import { DomSanitizer } from '@angular/platform-browser';
 
-
-
 @Component({
   selector: 'app-chat-room',
-  standalone:true,
-  imports: [ CommonModule,
+  standalone: true,
+  imports: [
+    CommonModule,
     MatCardModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
 
-    ReactiveFormsModule],
+    ReactiveFormsModule,
+  ],
   templateUrl: './chat-room.component.html',
-  styleUrl: './chat-room.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './chat-room.component.css',
 })
-export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
+export class ChatRoomComponent
+  implements OnInit, OnChanges, AfterViewInit, OnDestroy
+{
   @ViewChild('chatContainer') private chatContainer!: ElementRef;
-
 
   @Input() id: string = 'public';
   user: any = {};
 
   loading = false;
-  subscription = new Subscription()
-  message = new FormControl('')
+  subscription = new Subscription();
+  message = new FormControl('');
   chatMessageList: any[] = [];
 
-  constructor(private chatService: ChatService, 
+  constructor(
+    private chatService: ChatService,
     private gameDataService: GameDataService,
     private userService: UserService,
-    private matIconRegistry: MatIconRegistry, private domSanitizer: DomSanitizer) {
-      this.matIconRegistry.addSvgIcon(
-        'kitty',
-        this.domSanitizer.bypassSecurityTrustResourceUrl('assets/svg/kitty.svg')
-      );
-    }
+    private matIconRegistry: MatIconRegistry,
+    private domSanitizer: DomSanitizer,
+  ) {
+    this.matIconRegistry.addSvgIcon(
+      'kitty',
+      this.domSanitizer.bypassSecurityTrustResourceUrl('assets/svg/kitty.svg'),
+    );
+  }
 
   // listen to enter input
   @HostListener('document:keydown.enter', ['$event'])
   handleKeyboardEvent(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.value && this.user.name) {
-      this.sendChat()
+      this.sendChat();
     }
   }
 
   ngOnInit() {
-    this.getUser()
+    this.getUser();
 
     const messages = this.gameDataService.connect();
 
-    
     this.subscription = messages.subscribe({
       next: (message: any) => {
         console.log('Received message:', message);
-        message = JSON.parse(message.event)
-        this.updateMessageList(message)
+        message = JSON.parse(message.event);
+        this.updateMessageList(message);
       },
       error: (error: any) => {
         console.error('Error:', error);
-      }
+      },
     });
 
     setTimeout(() => {
@@ -88,7 +103,7 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
     if (this.id !== '') {
       this.subscription.unsubscribe();
       this.getLastMessages(this.id);
-      this.subscribeToChat(this.id)
+      this.subscribeToChat(this.id);
     }
   }
 
@@ -104,29 +119,26 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
         message: this.message.value,
         user: this.user,
         id: this.id,
-        timestamp: new Date().getTime()
-      })
-     // await this.chatService.sendChat(this.id, this.message.value, this.user.color, this.user.name,);
+        timestamp: new Date().getTime(),
+      });
+      // await this.chatService.sendChat(this.id, this.message.value, this.user.color, this.user.name,);
       this.message.setValue('');
-     // this.scrollToBottom();
+      // this.scrollToBottom();
     }
     this.loading = false;
   }
 
   async getLastMessages(id: string) {
-    const messages = await this.chatService.getLastMessages(id) || [];
+    const messages = (await this.chatService.getLastMessages(id)) || [];
     this.chatMessageList = [...messages];
-
   }
 
   async getUser() {
     this.user = await this.userService.user.getValue();
     if (!this.user) {
       this.user = await this.userService.getUser();
-
     }
   }
-
 
   subscribeToChat(id: string) {
     // this.subscription = this.chatService.subscribeToChat(id)
@@ -154,5 +166,4 @@ export class ChatRoomComponent implements OnInit, OnChanges, AfterViewInit, OnDe
       }
     }, 100);
   }
-
 }

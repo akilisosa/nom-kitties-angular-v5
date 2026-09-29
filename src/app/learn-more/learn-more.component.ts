@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 
@@ -7,8 +7,7 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink, MatButtonModule],
   standalone: true,
   templateUrl: './learn-more.component.html',
-  styleUrl: './learn-more.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './learn-more.component.css',
 })
-export class LearnMoreComponent {
-
-}
+export class LearnMoreComponent {}

@@ -7,6 +7,7 @@ import {
   OnInit,
   TemplateRef,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -36,6 +37,7 @@ import { PodiumComponent } from './components/podium/podium.component';
     PodiumComponent,
   ],
   templateUrl: './room.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './room.component.css',
 })
 export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {

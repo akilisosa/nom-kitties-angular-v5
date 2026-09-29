@@ -1,14 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-shop',
-  imports: [
-    MatButtonModule
-  ],
+  imports: [MatButtonModule],
   templateUrl: './shop.component.html',
-  styleUrl: './shop.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './shop.component.css',
 })
-export class ShopComponent {
-
-}
+export class ShopComponent {}

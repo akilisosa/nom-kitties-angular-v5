@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ChatRoomComponent } from '../shared/components/chat-room/chat-room.component';
 
 @Component({
@@ -6,8 +6,7 @@ import { ChatRoomComponent } from '../shared/components/chat-room/chat-room.comp
   imports: [ChatRoomComponent],
   standalone: true,
   templateUrl: './feline-forum.component.html',
-  styleUrl: './feline-forum.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './feline-forum.component.css',
 })
-export class FelineForumComponent {
-
-}
+export class FelineForumComponent {}

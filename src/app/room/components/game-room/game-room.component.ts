@@ -9,6 +9,7 @@ import {
   OnInit,
   Output,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import {
   drawKitty,
@@ -29,6 +30,7 @@ import { JoystickComponent } from '../joystick/joystick.component';
   imports: [JoystickComponent],
   standalone: true,
   templateUrl: './game-room.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './game-room.component.css',
 })
 export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {

@@ -1,6 +1,20 @@
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate,
+} from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  Input,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 @Component({
   selector: 'app-countdown',
@@ -8,30 +22,33 @@ import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angu
   standalone: true,
   templateUrl: './countdown.component.html',
   styleUrl: './countdown.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [
     trigger('countdownAnimation', [
-      state('void', style({
-        opacity: 0,
-        transform: 'scale(0.5)'
-      })),
-      state('*', style({
-        opacity: 1,
-        transform: 'scale(1)'
-      })),
-      transition(':enter', [
-        animate('0.5s ease-out')
-      ]),
-      transition('* => void', [
-        animate('0.5s ease-in')
-      ]),
+      state(
+        'void',
+        style({
+          opacity: 0,
+          transform: 'scale(0.5)',
+        }),
+      ),
+      state(
+        '*',
+        style({
+          opacity: 1,
+          transform: 'scale(1)',
+        }),
+      ),
+      transition(':enter', [animate('0.5s ease-out')]),
+      transition('* => void', [animate('0.5s ease-in')]),
       transition('* => *', [
         style({ transform: 'scale(1.5)', opacity: 0 }),
-        animate('0.5s ease-out')
-      ])
-    ])
-  ]
+        animate('0.5s ease-out'),
+      ]),
+    ]),
+  ],
 })
- export class CountdownComponent  implements OnInit, OnDestroy {
+export class CountdownComponent implements OnInit, OnDestroy {
   @Input() room: any; // Assuming room is passed as an input
   @Output() startGameEmit = new EventEmitter<void>();
   private intervalId: number | null = null;
@@ -59,9 +76,10 @@ import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angu
       return 0;
     }
 
-    const updatedAtMs = this.room.updatedAt instanceof Date 
-      ? this.room.updatedAt.getTime()
-      : new Date(this.room.updatedAt).getTime();
+    const updatedAtMs =
+      this.room.updatedAt instanceof Date
+        ? this.room.updatedAt.getTime()
+        : new Date(this.room.updatedAt).getTime();
 
     return Math.min(5000, Date.now() - updatedAtMs);
   }
@@ -72,7 +90,7 @@ import { Component, Output, EventEmitter, Input, OnInit, OnDestroy } from '@angu
       this.countdown = Math.max(0, timeLeft);
 
       if (this.countdown <= 0 && this.intervalId) {
-        this.startGameEmit.emit(); 
+        this.startGameEmit.emit();
         clearInterval(this.intervalId);
         this.intervalId = null;
       }

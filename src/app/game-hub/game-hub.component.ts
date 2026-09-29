@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -20,6 +20,7 @@ import { MatRippleModule } from '@angular/material/core';
     MatRippleModule,
   ],
   templateUrl: './game-hub.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './game-hub.component.css',
 })
 export class GameHubComponent implements OnInit {

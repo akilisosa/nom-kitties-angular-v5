@@ -1,4 +1,15 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,12 +44,15 @@ import { MatOptionModule } from '@angular/material/core';
     MatSelectModule,
     Player1Component,
     Player2Component,
-    GameboardComponent
+    GameboardComponent,
   ],
   templateUrl: './local-game.component.html',
-  styleUrl: './local-game.component.css'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './local-game.component.css',
 })
-export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
+export class LocalGameComponent
+  implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked
+{
   @ViewChild('lobbyContainer', { static: true }) lobbyContainer!: ElementRef;
 
   active: boolean = false;
@@ -52,7 +66,7 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   player1Color: string = '#a85c32';
   player2Color: string = '#000000';
 
-   isSidebarOpen = false;
+  isSidebarOpen = false;
   settingsView = false;
   size = 10;
 
@@ -60,17 +74,18 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
 
   form = this.fb.group({
     timeLimit: [30],
-    treatsOnFloor: [3]
+    treatsOnFloor: [3],
   });
 
   lobbyHeight = 0;
-  lobbyWidth = 0; 
+  lobbyWidth = 0;
 
-  constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
-
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngAfterViewInit(): void {
     // this.form.valueChanges.subscribe((value) => {
@@ -81,17 +96,16 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   ngAfterViewChecked() {
     const width = this.lobbyContainer.nativeElement.clientWidth;
     const height = this.lobbyContainer.nativeElement.clientHeight;
-    if(this.lobbyWidth !== width || this.lobbyHeight !== height){
+    if (this.lobbyWidth !== width || this.lobbyHeight !== height) {
       this.lobbyWidth = width;
       this.lobbyHeight = height;
       this.size = Math.min(width, height) - 5;
-      if(this.size > 600) {
+      if (this.size > 600) {
         this.size = 600;
         console.log('size', this.size);
       }
       this.cdr.detectChanges();
     }
-
   }
 
   ngOnDestroy() {
@@ -102,22 +116,20 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   handleSpaceBar(event: Event) {
     event.preventDefault(); // Prevent page scrolling
     if (this.active) {
-      this.pauseGame()
+      this.pauseGame();
     } else {
       if (this.timer === 30 || this.timer < 1) {
-
-        this.startGame()
+        this.startGame();
       } else {
-        this.resumeGame()
+        this.resumeGame();
       }
     }
     // Add your spacebar logic here
   }
 
-
   scoreChange(event: any) {
-    this.player1Score = event.player1Score
-    this.player2Score = event.player2Score
+    this.player1Score = event.player1Score;
+    this.player2Score = event.player2Score;
   }
 
   colorChange(event: any, player: string) {
@@ -126,7 +138,6 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
     } else if (player === 'player2') {
       this.player2Color = event;
     }
-
   }
 
   startGame() {
@@ -143,7 +154,6 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
-
 
   private startTimer() {
     this.interval = setInterval(() => {
@@ -174,8 +184,4 @@ export class LocalGameComponent implements OnInit, OnDestroy, AfterViewInit, Aft
       this.interval = null;
     }
   }
-
- 
-
-
 }
