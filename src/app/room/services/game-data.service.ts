@@ -1,5 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import outputs from '../../../../amplify_outputs.json';
+
+interface EventsOutputs {
+  url: string; // https://<id>.appsync-api.<region>.amazonaws.com/event
+  aws_region: string;
+  default_authorization_type: string;
+  api_key: string;
+}
+
+// Written by the backend (amplify/backend.ts) into amplify_outputs.json under custom.events
+const eventsOutputs = (outputs as { custom?: { events?: EventsOutputs } }).custom?.events;
+const eventsConfig = eventsOutputs && {
+  httpDomain: new URL(eventsOutputs.url).host,
+  realtimeDomain: new URL(eventsOutputs.url).host.replace('appsync-api', 'appsync-realtime-api'),
+  apiKey: eventsOutputs.api_key,
+};
 
 interface WebSocketMessage {
   type: string;
@@ -19,9 +35,9 @@ export class GameDataService {
 
   private ws!: WebSocket;
   private messageSubject = new Subject<any>();
-  private readonly REALTIME_DOMAIN = 'hjzp2ynwl5ehvjn4lihvnesplm.appsync-realtime-api.us-east-1.amazonaws.com';
-  private readonly HTTP_DOMAIN = 'hjzp2ynwl5ehvjn4lihvnesplm.appsync-api.us-east-1.amazonaws.com';
-  private readonly API_KEY = 'da2-kjhwxlzu25d2fgtu5tx54wggem';
+  private readonly REALTIME_DOMAIN = eventsConfig?.realtimeDomain ?? '';
+  private readonly HTTP_DOMAIN = eventsConfig?.httpDomain ?? '';
+  private readonly API_KEY = eventsConfig?.apiKey ?? '';
 
 
   constructor() { }
@@ -35,6 +51,10 @@ export class GameDataService {
 
 
   connect() {
+    if (!eventsConfig) {
+      throw new Error('Events API config missing: amplify_outputs.json has no custom.events. Regenerate it after deploying the backend.');
+    }
+
     // Create authorization header
     const authorization = {
       host: this.HTTP_DOMAIN,
