@@ -65,6 +65,8 @@ const schema = a.schema({
 
      stats: a.string(), // JSON
 
+     settings: a.string(), // JSON (GameSettings in src/app/room/game-settings.ts)
+
      // Non-owners change this only through the joinRoom/leaveRoom mutations below.
      players: a.string().array()
        .authorization(
