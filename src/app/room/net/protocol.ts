@@ -1,7 +1,8 @@
 // Wire protocol for the realtime room channel (/default/rooms/<roomId>).
 // All positions are in world units (see WORLD_SIZE in ../engine/kitty-engine.ts), never screen pixels.
 
-export const PROTOCOL_VERSION = 1;
+// v2: `treats` is each spawner's own list (no scores); the host's scores moved to `scores`.
+export const PROTOCOL_VERSION = 2;
 
 // Type aliases rather than interfaces: the Amplify events client only accepts JSON-shaped
 // types (DocumentType), and interfaces don't satisfy its index signature.
@@ -29,11 +30,16 @@ export type HeartbeatMsg = Envelope<'heartbeat'>;
 export type ByeMsg = Envelope<'bye'>;
 /** Sender's own kitty: position and velocity (world units, units/s). */
 export type StateMsg = Envelope<'state'> & { x: number; y: number; vx: number; vy: number };
-/** Host only: the full treat list plus the current score table. */
-export type TreatsMsg = Envelope<'treats'> & { treats: Treat[]; scores: Scores };
+/**
+ * A spawner's own treats (the host in 'host' mode, every player in 'everyone' mode). Replaces
+ * whatever we had from that sender; everyone draws the union of all spawners' lists.
+ */
+export type TreatsMsg = Envelope<'treats'> & { treats: Treat[] };
+/** Host only: the current score table (periodic resync). */
+export type ScoresMsg = Envelope<'scores'> & { scores: Scores };
 /** Player asks the host for a treat. */
 export type ClaimMsg = Envelope<'claim'> & { id: string };
-/** Host only: treat `id` went to `by`. */
+/** Host only: treat `id` went to `by`. Its spawner replaces it. May be repeated for a stale id. */
 export type ScoredMsg = Envelope<'scored'> & { id: string; by: string; scores: Scores };
 /** Host only: round over. */
 export type EndMsg = Envelope<'end'> & { scores: Scores; winners: string[] };
@@ -44,6 +50,7 @@ export type RoomMessage =
   | ByeMsg
   | StateMsg
   | TreatsMsg
+  | ScoresMsg
   | ClaimMsg
   | ScoredMsg
   | EndMsg;
@@ -85,7 +92,9 @@ export function parseMessage(raw: unknown): RoomMessage | null {
       case 'state':
         return areNumbers(raw, 'x', 'y', 'vx', 'vy');
       case 'treats':
-        return Array.isArray(raw['treats']) && raw['treats'].every(isTreat) && isScores(raw['scores']);
+        return Array.isArray(raw['treats']) && raw['treats'].every(isTreat);
+      case 'scores':
+        return isScores(raw['scores']);
       case 'claim':
         return areStrings(raw, 'id');
       case 'scored':
