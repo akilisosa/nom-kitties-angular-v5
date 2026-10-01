@@ -52,7 +52,7 @@ export class HomeComponent {
     this.loading = true;
     if (this.joinGameForm.valid) {
       const room = await this.roomService.getRoomByCode(
-        this.joinGameForm.value.simpleCode?.toLocaleUpperCase() || '',
+        this.joinGameForm.value.simpleCode || '',
       );
       if (room) {
         this.router.navigate(['room', room.simpleCode]);

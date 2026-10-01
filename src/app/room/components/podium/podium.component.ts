@@ -1,8 +1,16 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { UserService } from '../../../shared/services/user.service';
 import { CommonModule } from '@angular/common';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { Scores } from '../../net/protocol';
+
+interface PodiumRow {
+  id: string;
+  name: string;
+  color: string;
+  score: number;
+}
 
 @Component({
   selector: 'app-podium',
@@ -12,12 +20,14 @@ import { DomSanitizer } from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './podium.component.css',
 })
-export class PodiumComponent {
-  @Input() podium: any[] = [];
-  @Input() room: any = {};
-  @Input() playersScore: any = {};
+export class PodiumComponent implements OnChanges {
+  @Input() winners: string[] = [];
+  @Input() scores: Scores = {};
 
-  winners: any[] = [];
+  winnerRows: PodiumRow[] = [];
+  scoreRows: PodiumRow[] = [];
+
+  private readonly users = new Map<string, Promise<PodiumRow>>();
 
   constructor(
     private userService: UserService,
@@ -30,16 +40,30 @@ export class PodiumComponent {
     );
   }
 
-  ngOnInit() {
-    this.getWinners(this.room.winners);
+  async ngOnChanges() {
+    const winners = this.winners ?? [];
+    const scores = this.scores ?? {};
+    const [winnerRows, scoreRows] = await Promise.all([
+      Promise.all(winners.map((id) => this.lookup(id, scores))),
+      Promise.all(Object.keys(scores).map((id) => this.lookup(id, scores))),
+    ]);
+    this.winnerRows = winnerRows;
+    this.scoreRows = scoreRows.sort((a, b) => b.score - a.score);
   }
 
-  async getWinners(winners: string[]) {
-    for (let i = 0; i < winners.length; i++) {
-      const user = await this.userService.getUserByOwnerID(winners[i]);
-      this.winners.push(user);
+  private async lookup(id: string, scores: Scores): Promise<PodiumRow> {
+    if (!this.users.has(id)) {
+      this.users.set(
+        id,
+        this.userService.getUserByOwnerID(id).then((user) => ({
+          id,
+          name: user?.name ?? 'Kitty',
+          color: user?.color ?? '#000000',
+          score: 0,
+        })),
+      );
     }
-
-    console.log(this.winners);
+    const row = await this.users.get(id)!;
+    return { ...row, score: scores[id] ?? 0 };
   }
 }

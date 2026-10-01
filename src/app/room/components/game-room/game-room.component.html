@@ -3,6 +3,12 @@
 
 </div>
 
+<div style="display:flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 1rem; margin: 0.5rem">
+    @for (row of scoreRows; track row.id) {
+        <span><span [style.color]="row.color">●</span> {{ row.name }}: {{ row.score }}</span>
+    }
+</div>
+
 <div  class="flex-row" style="background-color: aqua; height: auto; justify-content: center;">
     <app-joystick (directionChange)="onDirectionChange($event)"></app-joystick>
 </div>

@@ -81,7 +81,7 @@ export class JoystickComponent {
       keys: { w: true, s: false, a: true, d: false },
     },
     { angle: -Math.PI / 2, keys: { w: true, s: false, a: false, d: false } },
-    { angle: -Math.PI / 4, keys: { w: false, s: false, a: false, d: true } },
+    { angle: -Math.PI / 4, keys: { w: true, s: false, a: false, d: true } },
   ] as const;
 
   private updateDirection(angle: number): void {

@@ -12,12 +12,12 @@
       Chat
     </button>
     @if (gameState == "lobby") {
-      <button mat-raised-button color="accent">Lobby</button>
+      <button mat-raised-button color="accent">Lobby {{ room?.simpleCode }}</button>
     }
 
     @if (gameState == "playing") {
       <button mat-raised-button color="accent">
-        {{ timeRemaining.value }}
+        {{ timeRemaining }}
       </button>
     }
     <button mat-raised-button color="warn" (click)="leaveRoom()">
@@ -26,31 +26,43 @@
   </div>
 
   <div id="lobbyContainer" #lobbyContainer style="width: 100%; height: 80vh">
+    @if (gameState == "loading" || gameState == "results") {
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <mat-spinner></mat-spinner>
+        @if (gameState == "results") {
+          <p>Time! Waiting for the host's results…</p>
+        }
+      </div>
+    }
     @if (gameState == "lobby") {
       <app-lobby
         (startGameEmit)="startGame()"
         [isModalOpen]="isModalOpen"
         [size]="gameSize"
-        [room]="room"
-        [playerList]="playerList"
+        [isOwner]="isOwner"
+        [roster]="roster"
       ></app-lobby>
     }
-    <!-- <app-controller [isModalOpen]="isModalOpen" [size]="gameSize" [room]="room" [playerList]="playerList"></app-controller> -->
     @if (gameState == "countdown") {
-      <app-countdown (startGameEmit)="playGame()" [room]="room"></app-countdown>
+      <app-countdown [startsAt]="startsAt"></app-countdown>
     }
     @if (gameState == "playing") {
       <app-game-room
-        (playerScoreEmit)="playerScored($event)"
+        (scoresChange)="onScoresChange($event)"
         [isModalOpen]="isModalOpen"
         [size]="gameSize"
-        [room]="room"
-        [playerList]="playerList"
+        [isHost]="isOwner"
+        [hostId]="room?.owner ?? ''"
+        [players]="currentPlayers"
+        [endsAt]="endsAt"
       ></app-game-room>
     }
 
     @if (gameState == "podium") {
-      <app-podium [room]="room" [playersScore]="playersScore"></app-podium>
+      <app-podium [winners]="winners" [scores]="scores"></app-podium>
+      @if (isOwner) {
+        <button mat-raised-button color="primary" (click)="playAgain()">Back to lobby</button>
+      }
     }
   </div>
 </div>
@@ -79,6 +91,8 @@
     </div>
   </h2>
   <mat-dialog-content>
-    <app-chat-room [id]="room.id"></app-chat-room>
+    @if (room) {
+      <app-chat-room [id]="room.id"></app-chat-room>
+    }
   </mat-dialog-content>
 </ng-template>

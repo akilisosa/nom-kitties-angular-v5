@@ -19,7 +19,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { ChatService } from '../../services/chat.service';
-import { GameDataService } from '../../../room/services/game-data.service';
+import { events } from 'aws-amplify/data';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
@@ -48,12 +48,12 @@ export class ChatRoomComponent
 
   loading = false;
   subscription = new Subscription();
+  private channel: Awaited<ReturnType<typeof events.connect>> | null = null;
   message = new FormControl('');
   chatMessageList: any[] = [];
 
   constructor(
     private chatService: ChatService,
-    private gameDataService: GameDataService,
     private userService: UserService,
     private matIconRegistry: MatIconRegistry,
     private domSanitizer: DomSanitizer,
@@ -76,22 +76,23 @@ export class ChatRoomComponent
   ngOnInit() {
     this.getUser();
 
-    const messages = this.gameDataService.connect();
+    this.connectChannel();
+  }
 
-    this.subscription = messages.subscribe({
-      next: (message: any) => {
-        console.log('Received message:', message);
-        message = JSON.parse(message.event);
-        this.updateMessageList(message);
-      },
-      error: (error: any) => {
-        console.error('Error:', error);
-      },
-    });
-
-    setTimeout(() => {
-      this.gameDataService.subscribe(`/default/messages/${this.id}`);
-    }, 1000);
+  private async connectChannel() {
+    const channel = await events.connect(`/default/messages/${this.id}`);
+    if (this.subscription.closed) {
+      channel.close();
+      return;
+    }
+    this.channel = channel;
+    this.subscription.add(
+      channel.subscribe({
+        next: (message: any) => this.updateMessageList(message.event),
+        error: (error: any) => console.error('Chat channel error:', error),
+      }),
+    );
+    this.subscription.add(() => channel.close());
   }
 
   ngAfterViewInit() {
@@ -101,7 +102,6 @@ export class ChatRoomComponent
   ngOnChanges() {
     console.log('changes', this.id);
     if (this.id !== '') {
-      this.subscription.unsubscribe();
       this.getLastMessages(this.id);
       this.subscribeToChat(this.id);
     }
@@ -114,7 +114,7 @@ export class ChatRoomComponent
   async sendChat() {
     this.loading = true;
     if (this.message.value) {
-      this.gameDataService.publishEvent(`/default/messages/${this.id}`, {
+      this.channel?.publish({
         type: 'CHAT',
         message: this.message.value,
         user: this.user,

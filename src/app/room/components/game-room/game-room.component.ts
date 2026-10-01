@@ -1,29 +1,42 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
+  NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
   Output,
   ViewChild,
   ChangeDetectionStrategy,
+  inject,
 } from '@angular/core';
-import {
-  drawKitty,
-  generateRandomPosition,
-  getScaledValue,
-  spawnCollectible,
-} from './draw-util';
-import { GameDataService } from '../../services/game-data.service';
-// import { GameEventsService } from '../../services/game-events.service';
 import { Subscription } from 'rxjs';
-import { AuthService } from '../../../shared/services/auth.service';
-import { UserService } from '../../../shared/services/user.service';
-
 import { JoystickComponent } from '../joystick/joystick.component';
+import {
+  KITTY_SIZE,
+  Keys,
+  KittyEngine,
+  TREAT_RADIUS,
+  Vec,
+  WORLD_SIZE,
+  touchesTreat,
+} from '../../engine/kitty-engine';
+import { RoomSessionService } from '../../net/room-session.service';
+import { RoomMessage, Scores, Treat } from '../../net/protocol';
+
+// ---- Gameplay knobs -------------------------------------------------------
+/** Treats on the floor at once. */
+export const TREATS_ON_FLOOR = 5;
+/** Extra distance the host allows on a claim, to cover network lag. */
+const CLAIM_SLACK = 80;
+/** A claim with no answer is retried after this long. */
+const CLAIM_RETRY_MS = 1000;
+/** Host re-sends treats + scores this often, for anyone whose view mounted late. */
+const TREATS_RESYNC_MS = 2000;
+// ---------------------------------------------------------------------------
 
 @Component({
   selector: 'app-game-room',
@@ -33,406 +46,184 @@ import { JoystickComponent } from '../joystick/joystick.component';
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './game-room.component.css',
 })
-export class GameRoomComponent implements OnInit, OnChanges, OnDestroy {
-  @ViewChild('gameCanvas') gameCanvas!: ElementRef;
+export class GameRoomComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+  @ViewChild('gameCanvas') gameCanvas!: ElementRef<HTMLCanvasElement>;
 
-  @Input() room: any;
-  @Input() size: number = 600;
-  @Input() playerList: any[] = [];
-  @Input() isModalOpen: boolean = false;
-  @Input() direction = '';
-  @Input() user = { id: '1', name: 'user1' };
-  @Input() treatsOnFloor = 5;
-  COLLECTIBLE_RADIUS = 10;
-  collectibles: any[] = [];
-  messages: any;
+  @Input() size = 600;
+  @Input() isModalOpen = false;
+  @Input() isHost = false;
+  /** The room owner; treat/score messages from anyone else are ignored. */
+  @Input() hostId = '';
+  /** Players in this round (Room.currentPlayers). Everyone else spectates. */
+  @Input() players: string[] = [];
+  /** Epoch ms when the round ends; the host ignores claims after it. */
+  @Input() endsAt = 0;
 
-  @Output() playerScoreEmit = new EventEmitter<any>();
+  /** Fires whenever the score table changes (host: locally, others: from the host). */
+  @Output() scoresChange = new EventEmitter<Scores>();
 
-  subscriptionID: any;
+  scores: Scores = {};
 
-  playing = false;
+  private readonly session = inject(RoomSessionService);
+  private readonly zone = inject(NgZone);
+  private engine!: KittyEngine;
+  private readonly subs = new Subscription();
+  /** treat id -> when we asked for it */
+  private readonly pendingClaims = new Map<string, number>();
+  private nextTreatId = 0;
+  private viewReady = false;
+  private resyncTimer: ReturnType<typeof setInterval> | null = null;
 
-  players = new Map();
-  owner = '';
+  get me(): string {
+    return this.session.userId;
+  }
 
-  player = {
-    id: '1',
-    x: 50,
-    y: 50,
-    size: 50,
-    speed: 5,
-    color: '#000000',
-    score: 0,
-  };
+  get scoreRows(): { id: string; name: string; color: string; score: number }[] {
+    return this.players
+      .map((id) => ({
+        id,
+        name: this.session.profileOf(id)?.name ?? 'Kitty',
+        color: this.session.profileOf(id)?.color ?? '#000000',
+        score: this.scores[id] ?? 0,
+      }))
+      .sort((a, b) => b.score - a.score);
+  }
 
-  keys = {
-    w: false,
-    s: false,
-    a: false,
-    d: false,
-  };
+  ngOnInit(): void {
+    const playing = this.players.includes(this.me);
+    this.engine = new KittyEngine(this.session, this.zone, {
+      background: '#BBB8B2',
+      controllable: playing,
+      start: startPosition(this.players.indexOf(this.me)),
+      showRemote: (id) => this.players.includes(id),
+      onMove: (self) => this.checkTreats(self),
+    });
 
-  obstacles: any[] = [
-    // Example obstacles - adjust positions and sizes as needed
-    { x: 200, y: 200, width: 100, height: 20, color: 'gray' }, // Horizontal wall
-    { x: 400, y: 100, width: 20, height: 200, color: 'gray' }, // Vertical wall
-    { x: 100, y: 400, width: 200, height: 20, color: 'gray' }, // Another wall
-  ];
+    this.subs.add(this.session.messages$.subscribe((msg) => this.handle(msg)));
 
-  animationFrameId: any;
-  ctx: any;
-  canvas: any;
-
-  subscription = new Subscription();
-  pi2: number = Math.PI * 2;
-
-  @HostListener('window:keydown', ['$event'])
-  handleKeyDown(event: KeyboardEvent) {
-    // Check if the pressed key exists in our keys object
-    if (event.key in this.keys) {
-      event.preventDefault(); // Prevent default browser scrolling
-      const prevKeys = { ...this.keys };
-      this.keys[event.key as keyof typeof this.keys] = true;
-
-      // check if this.keys values have changed
-      if (
-        Object.keys(this.keys).some(
-          (key) =>
-            prevKeys[key as keyof typeof this.keys] !==
-            this.keys[key as keyof typeof this.keys],
-        )
-      ) {
-        if (!this.owner || !this.playing) return;
-        this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
-          type: 'PLAYER_MOVE',
-          player: { ...this.player, id: this.owner },
-          keys: this.keys,
-          screenSize: this.size,
-        });
-      }
+    if (this.isHost) {
+      this.scores = Object.fromEntries(this.players.map((id) => [id, 0]));
+      this.engine.treats = Array.from({ length: TREATS_ON_FLOOR }, () => this.spawnTreat());
+      this.broadcastTreats();
+      this.scoresChange.emit(this.scores);
+      this.zone.runOutsideAngular(() => {
+        this.resyncTimer = setInterval(() => this.broadcastTreats(), TREATS_RESYNC_MS);
+      });
     }
   }
 
-  @HostListener('window:keyup', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    // Check if the released key exists in our keys object
-    if (event.key in this.keys) {
-      event.preventDefault();
-      const prevKeys = { ...this.keys };
-      this.keys[event.key as keyof typeof this.keys] = false;
-      if (!this.owner || !this.playing) return;
-      // check if this.keys values have changed
-      if (
-        Object.keys(this.keys).some(
-          (key) =>
-            prevKeys[key as keyof typeof this.keys] !==
-            this.keys[key as keyof typeof this.keys],
-        )
-      ) {
-        this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
-          type: 'PLAYER_MOVE',
-          player: { ...this.player, id: this.owner },
-          keys: this.keys,
-          screenSize: this.size,
-        });
-      }
-    }
+  ngAfterViewInit(): void {
+    this.engine.attach(this.gameCanvas.nativeElement);
+    this.viewReady = true;
+    this.ngOnChanges();
   }
 
-  constructor(
-    private gameDataService: GameDataService,
-    private userService: UserService,
-    private authService: AuthService,
-  ) {
-    this.gameLoop = this.gameLoop.bind(this);
-  }
-
-  // lifecycle
-
-  ngOnInit() {
-    this.setOwner();
-
-    this.messages = this.gameDataService.connect();
-    this.subscription.add(
-      this.messages.subscribe({
-        next: (message: any) => {
-          // console.log('Received message:', JSON.parse(message.event));
-          message = JSON.parse(message.event);
-          this.handleMessage(message);
-        },
-        error: (error: any) => {
-          console.error('Error:', error);
-        },
-      }),
-    );
-
-    setTimeout(() => {
-      this.subscriptionID = this.gameDataService.subscribe(
-        `/default/messages/${this.room.id}`,
-      );
-      this.drawCanvas();
-    }, 1000);
-  }
-
-  ngOnChanges() {
-    console.log('game room changes', this.size);
-    if (this.size > 0 && !this.isModalOpen) {
-      this.drawCanvas();
-      this.player.size = getScaledValue(50, this.size);
-      this.player.speed = getScaledValue(5, this.size);
-      this.COLLECTIBLE_RADIUS = getScaledValue(10, this.size);
-    }
-    if (this.isModalOpen) {
-      this.stopGameLoop();
+  ngOnChanges(): void {
+    if (!this.viewReady) return;
+    this.engine.resize(this.size);
+    if (this.isModalOpen || this.size <= 0) {
+      this.engine.stop();
+    } else {
+      this.engine.start();
     }
   }
 
   ngOnDestroy(): void {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
-
-    this.subscription.unsubscribe();
-    this.gameDataService.unsubscribe(this.subscriptionID);
+    this.engine?.destroy();
+    this.subs.unsubscribe();
+    if (this.resyncTimer) clearInterval(this.resyncTimer);
   }
 
-  // lifecycle called methods
-  async setOwner() {
-    this.owner = (await this.authService.getCurrentUser()).userId;
-    if (this.room.currentPlayers.includes(this.owner)) {
-      const kitty = await this.userService.getUser();
-      this.player = {
-        ...this.player,
-        color: kitty?.color || '#000000',
-        id: this.owner,
-      };
-      this.playing = true;
-    } else {
-      this.playing = false;
-    }
+  onDirectionChange(keys: Keys): void {
+    this.engine.setKeys(keys);
   }
 
-  private handleMessage(message: any) {
-    // console.log('PLAYER_MOVE', message.player?.id, this.owner)
-    if (message.type === 'PLAYER_SCORE') {
-      this.playerScore(message);
-    }
-    if (message.player?.id === this.owner) return;
-    if (message.type === 'PLAYER_MOVE') {
-      // message.player.x = getScaledValue(message.player.x, this.size);
-      // message.player.y = getScaledValue(message.player.y, this.size);
-      this.players.set(message.player.id, {
-        player: { ...message.player },
-        keys: message.keys,
-        screenSize: message.screenSize,
-      });
-      console.log('PLAYER_MOVE', message);
-      console.log('this.players', this.players);
-    }
-    if (message.type === 'COLLECTIBLES') {
-      message.event.collectibles.forEach((collectible: any) => {
-        collectible.x = (collectible.x / message.event.size) * this.size;
-        collectible.y = (collectible.y / message.event.size) * this.size;
-      });
-      this.collectibles = message.event.collectibles;
-    }
-  }
-
-  playerScore(message: any) {
-    console.log('PlayerScore', message);
-    // TODO output
-    this.playerScoreEmit.emit(message);
-  }
-
-  stopGameLoop() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-  }
-
-  onDirectionChange(keys: any) {
-    this.keys = keys;
-
-    this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
-      type: 'PLAYER_MOVE',
-      player: { ...this.player, id: this.owner },
-      keys: keys,
-      screenSize: this.size,
-    });
-  }
-
-  drawCanvas() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-
-    this.canvas = this.gameCanvas?.nativeElement;
-    if (!this.canvas) return;
-    this.ctx = this.canvas.getContext('2d');
-    this.ctx.fillStyle = '#BBB8B2';
-    this.ctx.fillRect(0, 0, this.size, this.size);
-    this.gameLoop();
-  }
-
-  consumeCollectible(player: any, width: number, collectibles: any[]) {
-    this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
-      type: 'PLAYER_SCORE',
-      player: { ...this.player, id: this.owner },
-      keys: this.keys,
-      screenSize: this.size,
-      collectibles,
-    });
-
-    this.collectibles = collectibles;
-  }
-
-  checkCollectibleCollection(
-    player: any,
-    width: number,
-    collectibleList: any[] = this.collectibles,
-  ) {
-    collectibleList.forEach((collectible) => {
-      if (collectible.active) {
-        const dx = player.x + width / 2 - collectible.x;
-        const dy = player.y + width / 2 - collectible.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < width / 2 + collectible.radius) {
-          collectible.active = false;
-          this.consumeCollectible(player, width, collectibleList);
+  private handle(msg: RoomMessage): void {
+    switch (msg.type) {
+      case 'hello':
+        // Late joiner or reconnect: bring them up to date.
+        if (this.isHost) this.broadcastTreats();
+        break;
+      case 'claim':
+        if (this.isHost) this.resolveClaim(msg.from, msg.id);
+        break;
+      case 'treats':
+        if (!this.isHost && msg.from === this.hostId) {
+          this.engine.treats = msg.treats;
+          this.setScores(msg.scores);
         }
-      }
-    });
+        break;
+      case 'scored':
+        if (!this.isHost && msg.from === this.hostId) {
+          this.engine.treats = this.engine.treats.filter((t) => t.id !== msg.id);
+          this.pendingClaims.delete(msg.id);
+          this.setScores(msg.scores);
+        }
+        break;
+    }
   }
 
-  checkCollision(obj1: any, obj2: any): boolean {
-    const scaledObj1 = {
-      x: obj1.x,
-      y: obj1.y,
-      width: getScaledValue(obj1.width, this.size),
-      height: getScaledValue(obj1.height, this.size),
-    };
+  /** Runs every frame (outside Angular) after our kitty moves. */
+  private checkTreats(self: Vec): void {
+    const now = Date.now();
+    for (const treat of this.engine.treats) {
+      if (!touchesTreat(self, treat)) continue;
+      const askedAt = this.pendingClaims.get(treat.id);
+      if (askedAt && now - askedAt < CLAIM_RETRY_MS) continue;
+      this.pendingClaims.set(treat.id, now);
+      if (this.isHost) {
+        this.zone.run(() => this.resolveClaim(this.me, treat.id));
+      } else {
+        this.session.publish({ type: 'claim', id: treat.id });
+      }
+    }
+  }
 
-    const scaledObj2 = {
-      x: obj2.x,
-      y: obj2.y,
-      width: getScaledValue(obj2.width, this.size),
-      height: getScaledValue(obj2.height, this.size),
-    };
+  /** Host only: first valid claim wins. */
+  private resolveClaim(by: string, treatId: string): void {
+    if (Date.now() > this.endsAt || !this.players.includes(by)) return;
+    const treat = this.engine.treats.find((t) => t.id === treatId);
+    if (!treat) return;
+    const where = by === this.me ? this.engine.self : this.engine.latestRemote(by);
+    if (!where || !touchesTreat(where, treat, CLAIM_SLACK)) return;
 
-    return (
-      scaledObj1.x < scaledObj2.x + scaledObj2.width &&
-      scaledObj1.x + scaledObj1.width > scaledObj2.x &&
-      scaledObj1.y < scaledObj2.y + scaledObj2.height &&
-      scaledObj1.y + scaledObj1.height > scaledObj2.y
+    this.engine.treats = [...this.engine.treats.filter((t) => t.id !== treatId), this.spawnTreat()];
+    this.pendingClaims.delete(treatId);
+    this.setScores({ ...this.scores, [by]: (this.scores[by] ?? 0) + 1 });
+    this.session.publish(
+      { type: 'scored', id: treatId, by, scores: this.scores },
+      { type: 'treats', treats: this.engine.treats, scores: this.scores },
     );
   }
 
-  // Check if an object collides with any obstacle
-  checkObstacleCollisions(obj: any, newX: number, newY: number): boolean {
-    const testObj = { x: newX, y: newY, width: obj.width, height: obj.height };
-    return this.obstacles.some((obstacle) =>
-      this.checkCollision(testObj, obstacle),
-    );
+  private broadcastTreats(): void {
+    this.session.publish({ type: 'treats', treats: this.engine.treats, scores: this.scores });
   }
 
-  newCollectibles(collectibles: any[]) {
-    this.gameDataService.publishEvent(`/default/messages/${this.room.id}`, {
-      type: 'COLLECTIBLES',
-      event: { collectibles, size: this.size },
-    });
+  private setScores(scores: Scores): void {
+    this.scores = scores;
+    this.scoresChange.emit(scores);
   }
 
-  gameLoop() {
-    if (this.isModalOpen) {
-      this.stopGameLoop();
-      return;
-    }
-
-    const newP1X =
-      this.player.x +
-      (this.keys.d ? this.player.speed : this.keys.a ? -this.player.speed : 0);
-    const newP1Y =
-      this.player.y +
-      (this.keys.s ? this.player.speed : this.keys.w ? -this.player.speed : 0);
-
-    this.player.x = Math.max(0, Math.min(newP1X, this.size - this.player.size));
-    this.player.y = Math.max(0, Math.min(newP1Y, this.size - this.player.size));
-    // Check i
-
-    this.ctx.clearRect(0, 0, this.size, this.size);
-    this.ctx.fillStyle = '#BBB8B2';
-    this.ctx.fillRect(0, 0, this.size, this.size);
-
-    // Draw the player
-    this.checkCollectibleCollection(this.player, this.player.size);
-
-    if (this.playing) {
-      drawKitty(
-        this.ctx,
-        this.player.x,
-        this.player.y,
-        this.player.size,
-        this.player.color,
-      );
-    }
-
-    // Remove collected circles and spawn new ones if needed
-    this.collectibles = this.collectibles.filter((c) => c.active);
-    if (this.collectibles.length < this.treatsOnFloor) {
-      while (this.collectibles.length < this.treatsOnFloor) {
-        spawnCollectible(
-          this.COLLECTIBLE_RADIUS,
-          this.obstacles,
-          this.size,
-          this.collectibles,
-          this.treatsOnFloor,
-        );
-      }
-      this.newCollectibles(this.collectibles);
-    }
-
-    [...this.players.values()].forEach((playerData: any) => {
-      if (!playerData.player) return;
-
-      const { player, keys, screenSize } = playerData;
-
-      // Update position if keys are pressed
-      const newX =
-        player.x +
-        (keys.d ? this.player.speed : keys.a ? -this.player.speed : 0);
-      const newY =
-        player.y +
-        (keys.s ? this.player.speed : keys.w ? -this.player.speed : 0);
-
-      player.x = Math.max(0, Math.min(newX, this.size - this.player.size));
-      player.y = Math.max(0, Math.min(newY, this.size - this.player.size));
-
-      // this.player.color;
-
-      drawKitty(this.ctx, player.x, player.y, this.player.size, player.color);
-
-      this.players.set(player.id, { player: { ...player }, keys, screenSize });
-    });
-
-    // Draw collectibles
-    this.collectibles.forEach((collectible) => {
-      if (collectible.active) {
-        this.ctx.beginPath();
-        this.ctx.arc(
-          collectible.x,
-          collectible.y,
-          this.COLLECTIBLE_RADIUS,
-          0,
-          this.pi2,
-        );
-        this.ctx.fillStyle = collectible.color;
-        this.ctx.fill();
-        this.ctx.closePath();
-      }
-    });
-    this.animationFrameId = requestAnimationFrame(() => this.gameLoop());
+  private spawnTreat(): Treat {
+    const pad = TREAT_RADIUS + 5;
+    return {
+      id: `${this.me.slice(0, 4)}-${this.nextTreatId++}`,
+      x: Math.round(pad + Math.random() * (WORLD_SIZE - 2 * pad)),
+      y: Math.round(pad + Math.random() * (WORLD_SIZE - 2 * pad)),
+    };
   }
+}
+
+/** Spread players around the edges so nobody starts on top of each other. */
+function startPosition(index: number): Vec | undefined {
+  if (index < 0) return undefined;
+  const max = WORLD_SIZE - KITTY_SIZE;
+  const spots: Vec[] = [
+    { x: 20, y: 20 },
+    { x: max - 20, y: max - 20 },
+    { x: max - 20, y: 20 },
+    { x: 20, y: max - 20 },
+  ];
+  return spots[index % spots.length];
 }

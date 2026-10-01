@@ -1,10 +1,15 @@
 <p>Thanks for playing Nom Kitties</p>
 
-<p>We have a Winner!!!</p>
-
-@for (kitty of winners; track kitty) {
-  <mat-icon svgIcon="kitty" [ngStyle]="{ color: kitty.color }"></mat-icon>
-  <p>{{ kitty.name }}</p>
+@if (winnerRows.length) {
+  <p>We have a Winner!!!</p>
+  @for (kitty of winnerRows; track kitty.id) {
+    <mat-icon svgIcon="kitty" [ngStyle]="{ color: kitty.color }"></mat-icon>
+    <p>{{ kitty.name }}</p>
+  }
+} @else {
+  <p>Nobody ate a treat this round.</p>
 }
 
-<p>id(s): {{ room.winners || "everyone" }}</p>
+@for (row of scoreRows; track row.id) {
+  <p>{{ row.name }}: {{ row.score }}</p>
+}

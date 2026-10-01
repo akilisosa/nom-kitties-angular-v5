@@ -8,8 +8,6 @@ import {
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  Output,
-  EventEmitter,
   Input,
   OnInit,
   OnDestroy,
@@ -49,19 +47,14 @@ import {
   ],
 })
 export class CountdownComponent implements OnInit, OnDestroy {
-  @Input() room: any; // Assuming room is passed as an input
-  @Output() startGameEmit = new EventEmitter<void>();
+  /** Epoch ms the owner picked (Room.gameStartTime); every client counts down to it. */
+  @Input() startsAt = 0;
   private intervalId: number | null = null;
-  countdown: number = 5000; // Start with 5 seconds in milliseconds
-  gameStartTime: number = 0;
+  seconds = 5;
 
   ngOnInit(): void {
-    const timeElapsed = this.calculateTimeElapsed();
-    console.log(timeElapsed);
-    this.gameStartTime = Date.now() + (5000 - timeElapsed); // Set game start time 5 seconds from now
-    this.startCountdown(this.gameStartTime);
-    // this.gameStartTime = Date.now() + (5000); // Set game start time 5 seconds from now
-    // this.startCountdown(this.gameStartTime);
+    this.tick();
+    this.intervalId = window.setInterval(() => this.tick(), 100);
   }
 
   ngOnDestroy(): void {
@@ -71,29 +64,7 @@ export class CountdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  private calculateTimeElapsed(): number {
-    if (!this.room?.updatedAt) {
-      return 0;
-    }
-
-    const updatedAtMs =
-      this.room.updatedAt instanceof Date
-        ? this.room.updatedAt.getTime()
-        : new Date(this.room.updatedAt).getTime();
-
-    return Math.min(5000, Date.now() - updatedAtMs);
-  }
-
-  private startCountdown(gameStartTime: any): void {
-    this.intervalId = window.setInterval(() => {
-      const timeLeft = gameStartTime - Date.now();
-      this.countdown = Math.max(0, timeLeft);
-
-      if (this.countdown <= 0 && this.intervalId) {
-        this.startGameEmit.emit();
-        clearInterval(this.intervalId);
-        this.intervalId = null;
-      }
-    }, 100); // Update every 100 milliseconds for smoother countdown
+  private tick(): void {
+    this.seconds = Math.max(0, Math.ceil((this.startsAt - Date.now()) / 1000));
   }
 }

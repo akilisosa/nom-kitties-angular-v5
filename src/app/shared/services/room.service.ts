@@ -1,19 +1,32 @@
 import { Injectable } from '@angular/core';
 import { generateClient } from 'aws-amplify/api';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import type { Schema } from '../../../../amplify/data/resource';
 
+export type Room = Schema['Room']['type'];
 
-type Room = Schema['Room']['type'];
+type RoomUpdate = { id: string } & Partial<
+  Pick<Room, 'status' | 'gameStartTime' | 'currentPlayers' | 'winners' | 'stats'>
+>;
+
+/** Rooms are always looked up by their uppercase code. */
+export const normalizeRoomCode = (code: string) => code.trim().toUpperCase();
+
+/** Reads use the public API key; writes go through the signed-in user. */
+const readClient = () => generateClient<Schema>({ authMode: 'apiKey' });
+const userClient = () => generateClient<Schema>({ authMode: 'userPool' });
+
+/** How far back the game hub looks for open rooms. */
+const ROOM_LIST_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 @Injectable({
   providedIn: 'root'
 })
 export class RoomService {
 
+room = new BehaviorSubject<Room | null>(null);
 
-room = new BehaviorSubject<any>(null);
-
-roomList = new BehaviorSubject<any[]>([]);
+roomList = new BehaviorSubject<Room[]>([]);
 
 
 constructor() { }
@@ -26,34 +39,27 @@ roomListShared() {
   return this.roomList.asObservable();
 }
 
-subscribeToRoomByID(id: any) {
-  const client = generateClient<Schema>({ authMode: 'apiKey' })
-  let res;
- return client.models.Room.onUpdate({ filter: { id: { eq: id } } })
- 
+/** Live updates to one room (owner writes: status, timing, winners). */
+observeRoom(id: string): Observable<Room> {
+  return readClient().models.Room.onUpdate({ filter: { id: { eq: id } } });
 }
 
- subscribeToRoomByCode(code: string) {
-  const client = generateClient<Schema>({ authMode: 'apiKey' })
- return client.models.Room.observeQuery({ filter: { simpleCode: { eq: code } } })
-}
-
-async getRoomByCode(code: string) {
-  const client: any = generateClient<Schema>({ authMode: 'apiKey' })
-  let res;
+async getRoom(id: string): Promise<Room | null> {
   try {
+    return (await readClient().models.Room.get({ id })).data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 
-    //  res = (await client.models.Room.listRoomsBySimpleCode({ simpleCode:code })).data;
-    // console.log('getRoomByCode', res);
-    res = (await client.models.Room.list({
-      filter: {
-        simpleCode: {
-          eq: code
-        }
-      }
-    
+async getRoomByCode(code: string): Promise<Room | undefined> {
+  let res: Room | undefined;
+  try {
+    res = (await readClient().models.Room.listRoomBySimpleCode({
+      simpleCode: normalizeRoomCode(code),
     })).data[0];
-    this.room.next(res);
+    this.room.next(res ?? null);
   } catch (error) {
     console.error(error);
   }
@@ -75,131 +81,88 @@ async createNewRoom(room: any) {
 
 }
 
-async deleteRoom(id: any) {
-  const client = generateClient<Schema>({ authMode: 'userPool' })
-  let res;
- let d =  (await client.models.Room.delete({ id })).data;
- let roomList = this.roomList.getValue();
-  roomList = roomList.filter((room) => room.id !== id);
-  this.roomList.next(roomList);
-  this.room.next(null);
-}
-
 removeFromRoomList(id: string) {
   const currentList = this.roomList.getValue();
   const newList = currentList.filter((room) => room.id !== id);
   this.roomList.next(newList);
 }
 
-async updateRoomWithWinners(id: any, winners: any[]) {
-  const client = generateClient<Schema>({ authMode: 'userPool' })
-  let res;
-  try {
-    res = (await client.models.Room.update({
-      id,
-      winners,
-      status: 'FINISHED'
-    } as any)).data;
-
-    console.log('updateRoomWithWinners', res)
-    this.room.next(res)
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-
+/** Open public rooms from the last day, newest first. */
 async getRoomList() {
-  const client: any = generateClient({ authMode: 'apiKey' })
-  let res;
+  let res: Room[] = [];
   try {
-    res =  (await client.models.Room.list({
-      filter: {
-          status: {
-              eq: 'WAITING'
-          }
+    res = (await readClient().models.Room.listRoomByPublicAndCreatedAt(
+      {
+        public: 'public',
+        createdAt: { gt: new Date(Date.now() - ROOM_LIST_WINDOW_MS).toISOString() },
       },
-    })).data;
+      { sortDirection: 'DESC', filter: { status: { eq: 'WAITING' } } },
+    )).data;
     this.roomList.next(res);
   }
    catch (error) {
     console.log(error);
-  } 
+  }
   return res;
 }
 
-async startGame(id: string, gameStartTime: string) {
-  console.log('startGame', id, gameStartTime)
-  const client = generateClient<Schema>({ authMode: 'userPool' })
-  let res;
+/** Atomically adds the caller to the room. Returns an error message if refused. */
+async joinRoom(roomId: string): Promise<{ room?: Room | null; error?: string }> {
   try {
-    res = (await client.models.Room.update({
-      id,
-      status: 'STARTING',
-      gameStartTime
-    } as any)).data;
-    this.room.next(res);
+    const { data, errors } = await userClient().mutations.joinRoom({ roomId });
+    if (errors?.length) {
+      return { error: errors[0].message };
+    }
+    return { room: data as Room | null };
   } catch (error) {
     console.error(error);
+    return { error: 'Could not join the room.' };
   }
-
-  return res;
 }
 
-async playGame(id: any, currentPlayers: string[]) {
-  console.log('startGame', id)
-  const client = generateClient<Schema>({ authMode: 'userPool' })
-  let res;
+/** Atomically removes the caller from the room. */
+async leaveRoom(roomId: string): Promise<void> {
   try {
-    res = (await client.models.Room.update({
-      id,
-      currentPlayers,
-      status: 'PLAYING',
-    } as any)).data;
-    this.room.next(res);
+    await userClient().mutations.leaveRoom({ roomId });
   } catch (error) {
     console.error(error);
   }
-
-  return res;
 }
 
-async joinRoom(id: any, players: string[]): Promise< any> {
-  const client: any = generateClient({ authMode: 'userPool' })
-  let res;
-  try {
-    res = (await client.models.Room .update({
-      id,
-      players
-    })).data;
+// ---- Owner-only writes ----------------------------------------------------
 
-    console.log('joinroom', res.data)
-    this.room.next(res.data)
-  } catch (error) {
-    console.error(error);
-  }
-
-  return res;
+/** WAITING -> STARTING: everyone counts down to gameStartTime. */
+async startGame(id: string, gameStartTime: string, currentPlayers: string[]) {
+  return this.ownerUpdate({ id, status: 'STARTING', gameStartTime, currentPlayers, winners: [], stats: null });
 }
 
+/** STARTING -> PLAYING, written by the host when gameStartTime arrives. */
+async setPlaying(id: string) {
+  return this.ownerUpdate({ id, status: 'PLAYING' });
+}
 
+async finishGame(id: string, winners: string[], stats: string) {
+  return this.ownerUpdate({ id, status: 'FINISHED', winners, stats });
+}
 
-async updateRoomWithPlayer(id: string, players: any[]) {
-  const client: any = generateClient({ authMode: 'apiKey' })
-  let res;
+async reopenRoom(id: string) {
+  return this.ownerUpdate({ id, status: 'WAITING' });
+}
+
+/** Host left: other clients see CANCELLED and head back to the hub. */
+async cancelRoom(id: string) {
+  return this.ownerUpdate({ id, status: 'CANCELLED' });
+}
+
+private async ownerUpdate(update: RoomUpdate) {
   try {
-    res = (await client.models.Room.update({
-      id,
-      players
-    })).data;
-
-    console.log('joinroom', res.data)
-    this.room.next(res.data)
+    const { data, errors } = await userClient().models.Room.update(update);
+    if (errors?.length) console.error(errors);
+    return data;
   } catch (error) {
     console.error(error);
+    return null;
   }
-
-  return res;
 }
 
 

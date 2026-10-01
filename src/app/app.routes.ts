@@ -21,6 +21,7 @@ export const routes: Routes = [
         path: 'room/:id',
         loadComponent: () =>
             import('./room/room.component').then((m) => m.RoomComponent),
+        canActivate: [authGuard],
     },
     {
         path: 'local-game',

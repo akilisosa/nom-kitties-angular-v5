@@ -13,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { RoomService } from '../../services/room.service';
+import { RoomService, normalizeRoomCode } from '../../services/room.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -81,7 +81,7 @@ export class QuickStartComponent implements OnInit {
 
   async joinGameWithCode() {
     this.view = 'loading';
-    const code = this.joinGameForm.value.simpleCode?.toLocaleLowerCase();
+    const code = normalizeRoomCode(this.joinGameForm.value.simpleCode ?? '');
     if (!code) {
       this.view = 'join';
       return;
