@@ -13,6 +13,11 @@ const backend = defineBackend({
   data,
 });
 
+// The original GraphQL API key expired and AppSync deleted it, so CloudFormation can't update
+// it in place. A new logical id makes CloudFormation create a fresh key instead. Bump the
+// suffix again if this ever recurs.
+backend.data.resources.cfnResources.cfnApiKey?.overrideLogicalId('amplifyDataGraphQLAPIDefaultApiKey2026');
+
 // Realtime game channel: an AppSync Events API, separate from the GraphQL API.
 // The client (RoomSessionService, via the aws-amplify/data `events` client) reads it from amplify_outputs.json (custom.events).
 const eventsStack = backend.createStack('events');
