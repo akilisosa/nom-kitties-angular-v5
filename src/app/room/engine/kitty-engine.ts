@@ -8,7 +8,7 @@ import { StateMsg, Treat } from '../net/protocol';
 /** Simulation space. Everything on the wire is in these units; only drawing scales to pixels. */
 export const WORLD_SIZE = 600;
 export const KITTY_SIZE = 50;
-/** World units per second (the old 5px/frame at 60 fps). */
+/** World units per second (the old 5px/frame at 60 fps), before the room's kitty speed setting. */
 export const KITTY_SPEED = 300;
 export const TREAT_RADIUS = 10;
 /** Min gap between `state` sends while moving (~15 Hz). Input changes send immediately. */
@@ -50,6 +50,8 @@ export interface KittyEngineOptions {
   /** Spectators don't get a kitty and don't send state. */
   controllable: boolean;
   start?: Vec;
+  /** Multiplier on KITTY_SPEED (the room's kitty speed setting). Defaults to 1. */
+  speed?: number;
   /** Only draw remote kitties whose id passes this filter (e.g. current round's players). */
   showRemote?: (id: string) => boolean;
   /** Called after the local kitty moves each frame. */
@@ -63,6 +65,8 @@ export interface KittyEngineOptions {
 export class KittyEngine {
   readonly self: Vec;
   treats: Treat[] = [];
+  /** Multiplier on KITTY_SPEED; the lobby updates it live when the owner changes the setting. */
+  speed: number;
 
   private keys: Keys = { ...NO_KEYS };
   private readonly remotes = new Map<string, Snapshot[]>();
@@ -82,6 +86,7 @@ export class KittyEngine {
     private readonly options: KittyEngineOptions,
   ) {
     this.self = { ...(options.start ?? randomStart()) };
+    this.speed = options.speed ?? 1;
 
     this.subs.add(
       session.messages$.subscribe((msg) => {
@@ -157,8 +162,8 @@ export class KittyEngine {
   private velocity(): Vec {
     const dx = (this.keys.d ? 1 : 0) - (this.keys.a ? 1 : 0);
     const dy = (this.keys.s ? 1 : 0) - (this.keys.w ? 1 : 0);
-    const norm = dx && dy ? Math.SQRT1_2 : 1;
-    return { x: dx * norm * KITTY_SPEED, y: dy * norm * KITTY_SPEED };
+    const step = (dx && dy ? Math.SQRT1_2 : 1) * KITTY_SPEED * this.speed;
+    return { x: dx * step, y: dy * step };
   }
 
   private readonly frame = (now: number) => {
