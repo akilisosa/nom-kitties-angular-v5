@@ -14,7 +14,7 @@ const backend = defineBackend({
 });
 
 // Realtime game channel: an AppSync Events API, separate from the GraphQL API.
-// The client (GameDataService) reads its endpoints and key from amplify_outputs.json (custom.events).
+// The client (RoomSessionService, via the aws-amplify/data `events` client) reads it from amplify_outputs.json (custom.events).
 const eventsStack = backend.createStack('events');
 
 const apiKeyAuth = {
@@ -36,7 +36,7 @@ const eventApi = new EventApi(eventsStack, 'NomKittiesEvents', {
   },
 });
 
-// Clients use channel paths like /default/messages/<roomId>
+// Channels: /default/rooms/<roomId> (game) and /default/messages/<roomId> (chat)
 new ChannelNamespace(eventsStack, 'DefaultNamespace', {
   api: eventApi,
   channelNamespaceName: 'default',

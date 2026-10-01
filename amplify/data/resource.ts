@@ -54,7 +54,7 @@ const schema = a.schema({
      full: a.boolean(),
 
      currentPlayers: a.string().array().authorization(
-       (allow: any) => [allow.owner(),
+       (allow) => [allow.owner(),
        allow.authenticated().to(['read']),
        allow.publicApiKey().to(['read'])],
      ),
@@ -65,11 +65,12 @@ const schema = a.schema({
 
      stats: a.string(), // JSON
 
+     // Non-owners change this only through the joinRoom/leaveRoom mutations below.
      players: a.string().array()
        .authorization(
-         (allow: any) => [allow.owner(),
-         allow.authenticated().to(['read', 'update']),
-         allow.publicApiKey().to(['read', 'update'])],
+         (allow) => [allow.owner(),
+         allow.authenticated().to(['read']),
+         allow.publicApiKey().to(['read'])],
        ),
 
 
@@ -80,12 +81,12 @@ const schema = a.schema({
      owner: a.string().required(),
      createdAt: a.datetime(),
    })
-   .secondaryIndexes((index: any) => [
+   .secondaryIndexes((index) => [
      index('public').sortKeys(['createdAt']),
      index('mode').sortKeys(['createdAt']),
      index('simpleCode'),
    ])
-   .authorization((allow: any) => [
+   .authorization((allow) => [
      // Owner can do all operations
      allow.owner(),
      allow.authenticated().to(['read']),
@@ -93,9 +94,23 @@ const schema = a.schema({
      allow.publicApiKey().to(['read']),
    ]),
 
+   // Atomic roster changes; the player id is always the caller's identity.sub.
+   joinRoom: a
+     .mutation()
+     .arguments({ roomId: a.id().required() })
+     .returns(a.ref('Room'))
+     .authorization((allow) => [allow.authenticated()])
+     .handler(a.handler.custom({ dataSource: a.ref('Room'), entry: './joinRoom.js' })),
 
-
-
+   leaveRoom: a
+     .mutation()
+     .arguments({ roomId: a.id().required() })
+     .returns(a.ref('Room'))
+     .authorization((allow) => [allow.authenticated()])
+     .handler([
+       a.handler.custom({ dataSource: a.ref('Room'), entry: './getRoom.js' }),
+       a.handler.custom({ dataSource: a.ref('Room'), entry: './leaveRoom.js' }),
+     ]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
