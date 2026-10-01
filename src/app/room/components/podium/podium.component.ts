@@ -23,6 +23,8 @@ interface PodiumRow {
 export class PodiumComponent implements OnChanges {
   @Input() winners: string[] = [];
   @Input() scores: Scores = {};
+  /** False between rounds of a match: the top score is only leading, not the winner yet. */
+  @Input() final = true;
 
   winnerRows: PodiumRow[] = [];
   scoreRows: PodiumRow[] = [];

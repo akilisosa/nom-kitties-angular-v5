@@ -17,6 +17,9 @@
 
     @if (gameState == "playing") {
       <button mat-raised-button color="accent">
+        @if (totalRounds > 1) {
+          Round {{ roundNumber }}/{{ totalRounds }} ·
+        }
         {{ timeRemaining }}
       </button>
     }
@@ -41,6 +44,8 @@
         [size]="gameSize"
         [isOwner]="isOwner"
         [roster]="roster"
+        [options]="options"
+        (optionsChange)="saveOptions($event)"
       ></app-lobby>
     }
     @if (gameState == "countdown") {
@@ -55,13 +60,25 @@
         [hostId]="room?.owner ?? ''"
         [players]="currentPlayers"
         [endsAt]="endsAt"
+        [settings]="roundSettings"
       ></app-game-room>
     }
 
     @if (gameState == "podium") {
-      <app-podium [winners]="winners" [scores]="scores"></app-podium>
+      @if (totalRounds > 1) {
+        <p>
+          @if (isFinalRound) {
+            Final totals after {{ totalRounds }} rounds
+          } @else {
+            Totals after round {{ roundNumber }} of {{ totalRounds }}. Next round starting soon…
+          }
+        </p>
+      }
+      <app-podium [winners]="winners" [scores]="scores" [final]="isFinalRound"></app-podium>
       @if (isOwner) {
-        <button mat-raised-button color="primary" (click)="playAgain()">Back to lobby</button>
+        <button mat-raised-button color="primary" (click)="playAgain()">
+          {{ isFinalRound ? "Back to lobby" : "End match" }}
+        </button>
       }
     }
   </div>

@@ -27,12 +27,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PodiumComponent } from './components/podium/podium.component';
 import { RoomSessionService } from './net/room-session.service';
 import { RoomMessage, Scores } from './net/protocol';
+import {
+  DEFAULT_ROOM_OPTIONS,
+  DEFAULT_SETTINGS,
+  GameSettings,
+  RoomOptions,
+  roomOptionColumns,
+  roomOptions,
+} from './game-settings';
 
 // ---- Gameplay knobs -------------------------------------------------------
-/** Countdown length after the owner presses Start. */
+// (Round length, rounds per match and the rest are room options; see ./game-settings.ts.)
+/** Countdown length after the owner presses Start (and before each later round). */
 const COUNTDOWN_MS = 5000;
-/** Round length when the room has no timeLimit (seconds). */
-const DEFAULT_TIME_LIMIT_S = 30;
+/** How long the podium shows between rounds before the host starts the next one. */
+const BETWEEN_ROUNDS_MS = 4000;
 // ---------------------------------------------------------------------------
 
 type GameState = 'loading' | 'lobby' | 'countdown' | 'playing' | 'results' | 'podium';
@@ -71,6 +80,13 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   /** Names of everyone connected, for the lobby roster. */
   roster: string[] = [];
+  /** The room's options, live (the lobby shows and edits these). */
+  options: RoomOptions = DEFAULT_ROOM_OPTIONS;
+  /** Snapshot taken when the round starts; never re-read mid-round. */
+  roundSettings: GameSettings = DEFAULT_SETTINGS;
+  roundNumber = 1;
+  totalRounds = 1;
+  /** Round scores while playing; match totals on the podium. */
   scores: Scores = {};
   winners: string[] = [];
   /** Epoch ms for the current round, derived from Room.gameStartTime. */
@@ -81,6 +97,9 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   private lastCheck = 0;
   private readonly CHECK_INTERVAL = 100; // milliseconds
   private roundTimer: ReturnType<typeof setInterval> | null = null;
+  private nextRoundTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Owner only: totals from earlier rounds of this match. */
+  private matchTotals: Scores = {};
   private playingWritten = false;
   private finishing = false;
   private hostSeen = false;
@@ -101,6 +120,10 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   get isOwner(): boolean {
     return !!this.room && this.room.owner === this.me;
+  }
+
+  get isFinalRound(): boolean {
+    return this.roundNumber >= this.totalRounds;
   }
 
   get currentPlayers(): string[] {
@@ -196,6 +219,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   private applyRoom(room: Room) {
     this.room = room;
+    this.options = roomOptions(room);
     switch (room.status) {
       case 'CANCELLED':
         if (!this.isOwner) this.bounce('The host left, so the room was closed.');
@@ -204,7 +228,10 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.stopRoundTimer();
         this.winners = (room.winners ?? []).filter((w): w is string => !!w);
         this.scores = parseScores(room.stats) ?? this.scores;
+        this.roundNumber = room.currentRound ?? 1;
+        this.totalRounds = this.options.totalRounds;
         this.gameState = 'podium';
+        this.scheduleNextRound();
         return;
       case 'STARTING':
       case 'PLAYING':
@@ -223,7 +250,12 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     this.stopRoundTimer();
     this.startsAt = startsAt;
-    this.endsAt = startsAt + (room.timeLimit || DEFAULT_TIME_LIMIT_S) * 1000;
+    const options = roomOptions(room);
+    this.endsAt = startsAt + options.timeLimit * 1000;
+    this.roundSettings = options;
+    this.roundNumber = room.currentRound ?? 1;
+    this.totalRounds = options.totalRounds;
+    this.matchTotals = this.roundNumber > 1 ? parseScores(room.stats) ?? {} : {};
     this.playingWritten = room.status === 'PLAYING';
     this.finishing = false;
     this.scores = {};
@@ -271,16 +303,48 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     const candidates = (room.players ?? []).filter((p): p is string => !!p && connected.has(p));
     const currentPlayers = shuffle(candidates).slice(0, room.playersPerRound || candidates.length);
     const gameStartTime = new Date(Date.now() + COUNTDOWN_MS).toISOString();
-    await this.roomService.startGame(room.id, gameStartTime, currentPlayers);
+    await this.roomService.startGame(room.id, gameStartTime, currentPlayers, 1);
   }
 
+  /** Lobby only: saves the owner's new options; everyone else gets them via the room subscription. */
+  async saveOptions(options: RoomOptions) {
+    if (!this.isOwner || !this.room || this.room.status !== 'WAITING') return;
+    this.options = options;
+    await this.roomService.updateOptions(this.room.id, roomOptionColumns(options));
+  }
+
+  /** Ends the round. `end` and Room.stats carry match totals (equal to the round's for 1 round). */
   private async finishRound() {
     if (this.finishing || !this.room) return;
     this.finishing = true;
-    const top = Math.max(0, ...Object.values(this.scores));
-    const winners = top > 0 ? Object.keys(this.scores).filter((id) => this.scores[id] === top) : [];
-    this.session.publish({ type: 'end', scores: this.scores, winners });
-    await this.roomService.finishGame(this.room.id, winners, JSON.stringify(this.scores));
+    const totals = addScores(this.matchTotals, this.scores);
+    const top = Math.max(0, ...Object.values(totals));
+    const winners = top > 0 ? Object.keys(totals).filter((id) => totals[id] === top) : [];
+    this.scores = totals;
+    this.session.publish({ type: 'end', scores: totals, winners });
+    await this.roomService.finishGame(this.room.id, winners, JSON.stringify(totals));
+  }
+
+  /** Owner: after a short podium, start the next round of the match with the same players. */
+  private scheduleNextRound() {
+    if (!this.isOwner || this.isFinalRound || this.nextRoundTimer || this.left) return;
+    const next = this.roundNumber + 1;
+    this.nextRoundTimer = setTimeout(() => {
+      this.nextRoundTimer = null;
+      void this.startNextRound(next);
+    }, BETWEEN_ROUNDS_MS);
+  }
+
+  private async startNextRound(round: number) {
+    if (!this.isOwner || !this.room || this.left) return;
+    const room = (await this.roomService.getRoom(this.room.id)) ?? this.room;
+    // The owner may have ended the match early (End match) while the podium showed.
+    if (room.status !== 'FINISHED' || (room.currentRound ?? 1) !== round - 1) return;
+    const connected = new Set([this.me, ...this.session.peers.keys()]);
+    const players = (room.currentPlayers ?? []).filter((p): p is string => !!p && connected.has(p));
+    if (!players.length) return;
+    const gameStartTime = new Date(Date.now() + COUNTDOWN_MS).toISOString();
+    await this.roomService.startGame(room.id, gameStartTime, players, round);
   }
 
   /** FINISHED -> WAITING so the same group can go again (and new players can join). */
@@ -324,6 +388,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (this.left) return;
     this.left = true;
     this.stopRoundTimer();
+    if (this.nextRoundTimer) clearTimeout(this.nextRoundTimer);
     const room = this.room;
     if (room && room.status !== 'CANCELLED') {
       if (this.isOwner) {
@@ -367,6 +432,12 @@ function parseScores(stats: string | null | undefined): Scores | null {
   } catch {
     return null;
   }
+}
+
+function addScores(a: Scores, b: Scores): Scores {
+  const sum: Scores = { ...a };
+  for (const [id, score] of Object.entries(b)) sum[id] = (sum[id] ?? 0) + score;
+  return sum;
 }
 
 function shuffle<T>(items: T[]): T[] {

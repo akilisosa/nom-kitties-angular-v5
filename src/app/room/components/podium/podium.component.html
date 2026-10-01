@@ -1,7 +1,9 @@
-<p>Thanks for playing Nom Kitties</p>
+@if (final) {
+  <p>Thanks for playing Nom Kitties</p>
+}
 
 @if (winnerRows.length) {
-  <p>We have a Winner!!!</p>
+  <p>{{ final ? "We have a Winner!!!" : "In the lead:" }}</p>
   @for (kitty of winnerRows; track kitty.id) {
     <mat-icon svgIcon="kitty" [ngStyle]="{ color: kitty.color }"></mat-icon>
     <p>{{ kitty.name }}</p>

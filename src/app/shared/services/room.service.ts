@@ -6,7 +6,18 @@ import type { Schema } from '../../../../amplify/data/resource';
 export type Room = Schema['Room']['type'];
 
 type RoomUpdate = { id: string } & Partial<
-  Pick<Room, 'status' | 'gameStartTime' | 'currentPlayers' | 'winners' | 'stats'>
+  Pick<
+    Room,
+    | 'status'
+    | 'gameStartTime'
+    | 'currentPlayers'
+    | 'winners'
+    | 'stats'
+    | 'currentRound'
+    | 'settings'
+    | 'timeLimit'
+    | 'totalRounds'
+  >
 >;
 
 /** Rooms are always looked up by their uppercase code. */
@@ -131,9 +142,25 @@ async leaveRoom(roomId: string): Promise<void> {
 
 // ---- Owner-only writes ----------------------------------------------------
 
-/** WAITING -> STARTING: everyone counts down to gameStartTime. */
-async startGame(id: string, gameStartTime: string, currentPlayers: string[]) {
-  return this.ownerUpdate({ id, status: 'STARTING', gameStartTime, currentPlayers, winners: [], stats: null });
+/**
+ * WAITING (or FINISHED, between rounds) -> STARTING: everyone counts down to gameStartTime.
+ * Round 1 clears the match totals in `stats`; later rounds add to them.
+ */
+async startGame(id: string, gameStartTime: string, currentPlayers: string[], currentRound = 1) {
+  return this.ownerUpdate({
+    id,
+    status: 'STARTING',
+    gameStartTime,
+    currentPlayers,
+    currentRound,
+    winners: [],
+    ...(currentRound === 1 ? { stats: null } : {}),
+  });
+}
+
+/** Lobby only: the owner changed the room options (see room/game-settings.ts). */
+async updateOptions(id: string, columns: Pick<Room, 'settings' | 'timeLimit' | 'totalRounds'>) {
+  return this.ownerUpdate({ id, ...columns });
 }
 
 /** STARTING -> PLAYING, written by the host when gameStartTime arrives. */
