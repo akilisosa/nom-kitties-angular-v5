@@ -8,6 +8,7 @@ import { RoomService } from '../shared/services/room.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatRippleModule } from '@angular/material/core';
+import { RoomOptionColumns, roomOptions, treatSpawningLabel } from '../room/game-settings';
 
 @Component({
   selector: 'app-game-hub',
@@ -55,5 +56,12 @@ export class GameHubComponent implements OnInit {
 
   refreshList() {
     this.roomService.getRoomList();
+  }
+
+  /** e.g. "Everyone spawns · 60s · 3 rounds" */
+  describe(room: RoomOptionColumns): string {
+    const options = roomOptions(room);
+    const rounds = options.totalRounds > 1 ? ` · ${options.totalRounds} rounds` : '';
+    return `${treatSpawningLabel(options.treatSpawning)} · ${options.timeLimit}s${rounds}`;
   }
 }

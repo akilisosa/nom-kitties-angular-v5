@@ -1,0 +1,66 @@
+<div class="options">
+  <mat-form-field appearance="fill">
+    <mat-label>Treats</mat-label>
+    <mat-select
+      [value]="value.treatSpawning"
+      [disabled]="!editable"
+      (selectionChange)="set('treatSpawning', $event.value)"
+    >
+      @for (mode of treatSpawningChoices; track mode) {
+        <mat-option [value]="mode">{{ treatSpawningLabel(mode) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>{{ value.treatSpawning === "everyone" ? "Treats each" : "Treats on floor" }}</mat-label>
+    <mat-select
+      [value]="value.treatsOnFloor"
+      [disabled]="!editable"
+      (selectionChange)="set('treatsOnFloor', $event.value)"
+    >
+      @for (count of treatsOnFloorChoices; track count) {
+        <mat-option [value]="count">{{ count }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Kitty speed</mat-label>
+    <mat-select
+      [value]="value.kittySpeed"
+      [disabled]="!editable"
+      (selectionChange)="set('kittySpeed', $event.value)"
+    >
+      @for (speed of kittySpeedChoices; track speed) {
+        <mat-option [value]="speed">{{ speed }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Round length</mat-label>
+    <mat-select
+      [value]="value.timeLimit"
+      [disabled]="!editable"
+      (selectionChange)="set('timeLimit', $event.value)"
+    >
+      @for (seconds of roundLengthChoices; track seconds) {
+        <mat-option [value]="seconds">{{ seconds }}s</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Rounds</mat-label>
+    <mat-select
+      [value]="value.totalRounds"
+      [disabled]="!editable"
+      (selectionChange)="set('totalRounds', $event.value)"
+    >
+      @for (rounds of roundCountChoices; track rounds) {
+        <mat-option [value]="rounds">{{ rounds }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>

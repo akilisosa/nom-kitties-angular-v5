@@ -1,0 +1,10 @@
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.5rem;
+}
+
+.options mat-form-field {
+  width: 10rem;
+}

@@ -17,6 +17,8 @@ import { RoomService, normalizeRoomCode } from '../../services/room.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { GameOptionsComponent } from '../game-options/game-options.component';
+import { DEFAULT_ROOM_OPTIONS, RoomOptions, roomOptionColumns } from '../../../room/game-settings';
 
 @Component({
   selector: 'app-quick-start',
@@ -30,6 +32,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatSelectModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
+    GameOptionsComponent,
   ],
   templateUrl: './quick-start.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -44,14 +47,15 @@ export class QuickStartComponent implements OnInit {
   newGameForm = new FormGroup({
     public: new FormControl(true),
     mode: new FormControl('classic'),
-    totalRounds: new FormControl(3),
-    timeLimit: new FormControl(30),
     playersPerRound: new FormControl(4),
 
     roomLimit: new FormControl(4),
     simpleCode: new FormControl(''),
     name: new FormControl('example'),
   });
+
+  /** Treats, speed, round length and rounds (see GameOptionsComponent). */
+  options: RoomOptions = { ...DEFAULT_ROOM_OPTIONS };
 
   joinGameForm = new FormGroup({
     simpleCode: new FormControl(''),
@@ -101,6 +105,8 @@ export class QuickStartComponent implements OnInit {
 
     await this.roomService.createNewRoom({
       ...this.newGameForm.value,
+      ...roomOptionColumns(this.options),
+      currentRound: 1,
       public: this.newGameForm.value.public ? 'public' : 'private',
       players: [owner],
       owner,
